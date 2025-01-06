@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -101,46 +102,49 @@ func (r *Repository) GetTree(path, ref string) ([]TreeEntry, error) {
 	}
 
 	var entries []TreeEntry
+	seenDirs := make(map[string]bool)
 
-	// First add directories
 	err = tree.Files().ForEach(func(f *object.File) error {
-		if path != "" && !strings.HasPrefix(f.Name, path) {
+		// Skip files not in the current path
+		if !strings.HasPrefix(f.Name, path) {
 			return nil
 		}
 
-		dir := filepath.Dir(f.Name)
-		if dir != "." && dir != path {
-			// Get the immediate subdirectory
-			parts := strings.Split(strings.TrimPrefix(dir, path), string(filepath.Separator))
-			if len(parts) > 0 {
-				dirName := parts[0]
-				if dirName != "" {
-					// Check if directory is already added
-					exists := false
-					for _, entry := range entries {
-						if entry.Name == dirName && entry.Type == "tree" {
-							exists = true
-							break
-						}
-					}
-					if !exists {
-						entries = append(entries, TreeEntry{
-							Name:    dirName,
-							Path:    filepath.Join(path, dirName),
-							Type:    "tree",
-							Size:    0,
-							Commit:  commit.Hash.String(),
-							Message: commit.Message,
-						})
-					}
-				}
-			}
+		// Get the relative path from current directory
+		relPath := strings.TrimPrefix(f.Name, path)
+		if path != "" {
+			relPath = strings.TrimPrefix(relPath, "/")
 		}
 
-		// Add files in current directory
-		if filepath.Dir(f.Name) == path || (path == "" && filepath.Dir(f.Name) == ".") {
+		// If there's no relative path, this file is not in the current directory
+		if relPath == "" {
+			return nil
+		}
+
+		// Split the relative path into parts
+		parts := strings.Split(relPath, "/")
+
+		if len(parts) > 1 {
+			// This is a file in a subdirectory
+			dirName := parts[0]
+			dirPath := filepath.Join(path, dirName)
+
+			// Only add directory once
+			if !seenDirs[dirPath] {
+				seenDirs[dirPath] = true
+				entries = append(entries, TreeEntry{
+					Name:    dirName,
+					Path:    dirPath,
+					Type:    "tree",
+					Size:    0,
+					Commit:  commit.Hash.String(),
+					Message: commit.Message,
+				})
+			}
+		} else {
+			// This is a file in the current directory
 			entries = append(entries, TreeEntry{
-				Name:    filepath.Base(f.Name),
+				Name:    f.Name[strings.LastIndex(f.Name, "/")+1:],
 				Path:    f.Name,
 				Type:    "blob",
 				Size:    f.Size,
@@ -149,6 +153,23 @@ func (r *Repository) GetTree(path, ref string) ([]TreeEntry, error) {
 			})
 		}
 		return nil
+	})
+
+	// Sort entries: directories first, then files, both alphabetically with dot files first
+	sort.Slice(entries, func(i, j int) bool {
+		// If both are the same type (directory or file)
+		if entries[i].Type == entries[j].Type {
+			// If both start with dot or both don't start with dot
+			iDot := strings.HasPrefix(entries[i].Name, ".")
+			jDot := strings.HasPrefix(entries[j].Name, ".")
+			if iDot == jDot {
+				return strings.ToLower(entries[i].Name) < strings.ToLower(entries[j].Name)
+			}
+			// Dot files/folders come first
+			return iDot && !jDot
+		}
+		// Directories come before files
+		return entries[i].Type == "tree" && entries[j].Type == "blob"
 	})
 
 	return entries, err

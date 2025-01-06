@@ -4,13 +4,15 @@ body {
     line-height: 1.6;
     margin: 0;
     padding: 0;
-    color: #333;
+    color: #E5E9F0;
+    background: #1F2126;
 }
 
 header {
-    background: #24292e;
-    color: white;
+    background: #262931;
+    color: #E5E9F0;
     padding: 1rem 2rem;
+    border-bottom: 1px solid #2E323A;
 }
 
 header h1 {
@@ -24,39 +26,50 @@ main {
 }
 
 .repo-list {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 .repo-item {
-    border: 1px solid #e1e4e8;
+    background: #262931;
+    border: 1px solid #2E323A;
     border-radius: 6px;
-    padding: 1rem;
-    background: white;
+    padding: 1.5rem;
+    transition: border-color 0.2s ease;
+}
+
+.repo-item:hover {
+    border-color: #61AFEF;
 }
 
 .repo-item h2 {
     margin: 0 0 0.5rem 0;
-    font-size: 1.2rem;
+    font-size: 1.25rem;
 }
 
 .repo-item h2 a {
-    color: #0366d6;
+    color: #61AFEF;
     text-decoration: none;
 }
 
 .repo-item h2 a:hover {
+    color: #7BC3FF;
     text-decoration: underline;
 }
 
 .repo-item p {
     margin: 0.5rem 0;
-    color: #586069;
+    color: #ABB2BF;
 }
 
 .repo-item small {
-    color: #6a737d;
+    display: block;
+    margin-top: 1rem;
+    color: #636B7B;
+    font-size: 0.875rem;
 }
 
 /* Repository view styles */
@@ -73,20 +86,39 @@ main {
 }
 
 .header-content h1 a {
-    color: white;
+    color: #61AFEF;
     text-decoration: none;
 }
 
 .header-content h1 a:hover {
+    color: #7BC3FF;
     text-decoration: underline;
 }
 
 .branch-selector select {
     padding: 0.5rem;
     border-radius: 4px;
-    border: 1px solid #444;
-    background: #333;
-    color: white;
+    border: 1px solid #2E323A;
+    background: #262931;
+    color: #E5E9F0;
+    font-size: 0.9rem;
+    cursor: pointer;
+    outline: none;
+}
+
+.branch-selector select:hover {
+    background: #2E323A;
+    border-color: #363B44;
+}
+
+.branch-selector select:focus {
+    border-color: #61AFEF;
+    box-shadow: 0 0 0 2px rgba(97, 175, 239, 0.2);
+}
+
+.branch-selector select option {
+    background: #262931;
+    color: #E5E9F0;
 }
 
 .repo-content {
@@ -96,23 +128,24 @@ main {
 }
 
 .file-browser {
-    background: white;
-    border: 1px solid #e1e4e8;
+    background: #262931;
+    border: 1px solid #2E323A;
     border-radius: 6px;
 }
 
 .path-nav {
     padding: 1rem;
-    border-bottom: 1px solid #e1e4e8;
-    background: #f6f8fa;
+    border-bottom: 1px solid #363B44;
+    background: #2E323A;
 }
 
 .path-nav a {
-    color: #0366d6;
+    color: #61AFEF;
     text-decoration: none;
 }
 
 .path-nav a:hover {
+    color: #7BC3FF;
     text-decoration: underline;
 }
 
@@ -124,40 +157,42 @@ table.files {
 table.files th,
 table.files td {
     padding: 0.75rem 1rem;
-    border-bottom: 1px solid #e1e4e8;
+    border-bottom: 1px solid #2E323A;
 }
 
 table.files th {
     text-align: left;
-    background: #f6f8fa;
+    background: #2E323A;
     font-weight: 600;
+    color: #E5E9F0;
 }
 
 table.files tr:hover {
-    background: #f6f8fa;
+    background: #2E323A;
 }
 
 table.files a {
-    color: #0366d6;
+    color: #61AFEF;
     text-decoration: none;
 }
 
 table.files a:hover {
+    color: #7BC3FF;
     text-decoration: underline;
 }
 
 .commit-history {
-    background: white;
-    border: 1px solid #e1e4e8;
+    background: #262931;
+    border: 1px solid #2E323A;
     border-radius: 6px;
 }
 
 .commit-history h2 {
     margin: 0;
     padding: 1rem;
-    border-bottom: 1px solid #e1e4e8;
+    border-bottom: 1px solid #2E323A;
     font-size: 1.2rem;
-    background: #f6f8fa;
+    background: #2E323A;
 }
 
 .commits {
@@ -167,7 +202,7 @@ table.files a:hover {
 
 .commit {
     padding: 1rem;
-    border-bottom: 1px solid #e1e4e8;
+    border-bottom: 1px solid #2E323A;
 }
 
 .commit:last-child {
@@ -194,16 +229,16 @@ table.files a:hover {
 
 /* File view styles */
 .file-content {
-    background: white;
-    border: 1px solid #e1e4e8;
+    background: #262931;
+    border: 1px solid #2E323A;
     border-radius: 6px;
 }
 
 .file-info {
     padding: 1rem;
-    border-bottom: 1px solid #e1e4e8;
-    background: #f6f8fa;
-    color: #586069;
+    border-bottom: 1px solid #2E323A;
+    background: #2E323A;
+    color: #D8DEE9;
 }
 
 .file-body {
@@ -223,8 +258,8 @@ table.files a:hover {
 }
 
 .symbol-sidebar {
-    background: white;
-    border: 1px solid #e1e4e8;
+    background: #262931;
+    border: 1px solid #2E323A;
     border-radius: 6px;
     height: fit-content;
     position: sticky;
@@ -233,8 +268,8 @@ table.files a:hover {
 
 .symbol-header {
     padding: 0.75rem 1rem;
-    border-bottom: 1px solid #e1e4e8;
-    background: #f6f8fa;
+    border-bottom: 1px solid #363B44;
+    background: #2E323A;
 }
 
 .symbol-header h3 {
@@ -252,13 +287,13 @@ table.files a:hover {
     display: flex;
     align-items: center;
     padding: 0.5rem 1rem;
-    color: #24292e;
+    color: #E5E9F0;
     text-decoration: none;
-    border-bottom: 1px solid #eaecef;
+    border-bottom: 1px solid #2E323A;
 }
 
 .symbol-item:hover {
-    background: #f6f8fa;
+    background: #2E323A;
 }
 
 .symbol-type {
@@ -281,19 +316,20 @@ table.files a:hover {
     font-family: monospace;
     font-size: 14px;
     line-height: 1.5;
+    background: #262931;
 }
 
 .line-numbers-table tr:hover {
-    background-color: #f6f8fa;
+    background: #2E323A;
 }
 
 .line-number {
     padding: 0 1rem;
     min-width: 40px;
     text-align: right;
-    color: #6e7781;
+    color: #636B7B;
     user-select: none;
-    border-right: 1px solid #e1e4e8;
+    border-right: 1px solid #2E323A;
 }
 
 .line-content {
@@ -307,14 +343,56 @@ table.files a:hover {
 }
 
 tr.highlighted {
-    background-color: #fff8c5 !important;
+    background-color: #363B44 !important;
     transition: background-color 0.5s ease;
 }
 
 /* Adjust file content width */
 .file-content {
     overflow-x: auto;
-    background: white;
-    border: 1px solid #e1e4e8;
+    background: #262931;
+    border: 1px solid #2E323A;
     border-radius: 6px;
+}
+
+/* Code syntax highlighting colors */
+.hljs {
+    background: #262931;
+    color: #E5E9F0;
+}
+
+.hljs-keyword {
+    color: #C678DD;
+}
+
+.hljs-built_in {
+    color: #56B6C2;
+}
+
+.hljs-type {
+    color: #56B6C2;
+}
+
+.hljs-literal {
+    color: #61AFEF;
+}
+
+.hljs-number {
+    color: #D19A66;
+}
+
+.hljs-string {
+    color: #98C379;
+}
+
+.hljs-comment {
+    color: #636B7B;
+}
+
+.hljs-function {
+    color: #61AFEF;
+}
+
+.hljs-class {
+    color: #56B6C2;
 }
