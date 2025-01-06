@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"sort"
 	"strings"
 	"time"
@@ -50,6 +51,125 @@ type Symbol struct {
 	Type string // "function", "method", "class", "interface", "const", "var"
 	Icon string
 	Line int
+}
+
+type ErrorType string
+
+const (
+	ErrorTypeNotFound      ErrorType = "NOT_FOUND"
+	ErrorTypeUnauthorized  ErrorType = "UNAUTHORIZED"
+	ErrorTypeBadRequest    ErrorType = "BAD_REQUEST"
+	ErrorTypeInternal      ErrorType = "INTERNAL"
+	ErrorTypeGit           ErrorType = "GIT_ERROR"
+	ErrorTypeInvalidPath   ErrorType = "INVALID_PATH"
+	ErrorTypeInvalidBranch ErrorType = "INVALID_BRANCH"
+)
+
+// AppError represents a structured application error
+type AppError struct {
+	Type      ErrorType `json:"type"`
+	Message   string    `json:"message"`
+	Detail    string    `json:"detail,omitempty"`
+	Code      int       `json:"-"` // HTTP status code
+	RequestID string    `json:"request_id,omitempty"`
+	File      string    `json:"file,omitempty"`
+	Line      int       `json:"line,omitempty"`
+	Err       error     `json:"-"`
+}
+
+// Error implements the error interface
+func (e *AppError) Error() string {
+	if e.Detail != "" {
+		return fmt.Sprintf("%s: %s (%s)", e.Type, e.Message, e.Detail)
+	}
+	return fmt.Sprintf("%s: %s", e.Type, e.Message)
+}
+
+// Unwrap implements the errors.Unwrap interface
+func (e *AppError) Unwrap() error {
+	return e.Err
+}
+
+// NewError creates a new AppError with stack trace
+func NewError(errType ErrorType, message string, code int) *AppError {
+	_, file, line, _ := runtime.Caller(1)
+	return &AppError{
+		Type:    errType,
+		Message: message,
+		Code:    code,
+		File:    filepath.Base(file),
+		Line:    line,
+	}
+}
+
+// WithDetail adds detail to the error
+func (e *AppError) WithDetail(detail string) *AppError {
+	e.Detail = detail
+	return e
+}
+
+// WithRequestID adds a request ID to the error
+func (e *AppError) WithRequestID(requestID string) *AppError {
+	e.RequestID = requestID
+	return e
+}
+
+// WithError wraps an underlying error
+func (e *AppError) WithError(err error) *AppError {
+	e.Err = err
+	if err != nil {
+		e.Detail = err.Error()
+	}
+	return e
+}
+
+// Common error constructors
+func NewNotFoundError(message string) *AppError {
+	return NewError(ErrorTypeNotFound, message, http.StatusNotFound)
+}
+
+func NewUnauthorizedError(message string) *AppError {
+	return NewError(ErrorTypeUnauthorized, message, http.StatusUnauthorized)
+}
+
+func NewBadRequestError(message string) *AppError {
+	return NewError(ErrorTypeBadRequest, message, http.StatusBadRequest)
+}
+
+func NewInternalError(message string) *AppError {
+	return NewError(ErrorTypeInternal, message, http.StatusInternalServerError)
+}
+
+func NewGitError(message string, err error) *AppError {
+	return NewError(ErrorTypeGit, message, http.StatusInternalServerError).WithError(err)
+}
+
+// HandleError writes the error to the response in a consistent format
+func HandleError(w http.ResponseWriter, r *http.Request, err error) {
+	var appErr *AppError
+	if !errors.As(err, &appErr) {
+		// Convert regular errors to AppError
+		appErr = NewInternalError("Internal Server Error").WithError(err)
+	}
+
+	// Add request ID if available
+	if requestID := r.Context().Value("requestID"); requestID != nil {
+		appErr.RequestID = requestID.(string)
+	}
+
+	// Log error with details
+	log.Printf("Error: %s in %s:%d [%s] %v",
+		appErr.Type,
+		appErr.File,
+		appErr.Line,
+		appErr.RequestID,
+		appErr.Err,
+	)
+
+	// Write error response
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(appErr.Code)
+	json.NewEncoder(w).Encode(appErr)
 }
 
 func (r *Repository) OpenGit() error {
@@ -210,31 +330,44 @@ func (r *Repository) GetCommits(ref string, limit int) ([]CommitInfo, error) {
 	return commits, nil
 }
 
-func (r *Repository) GetFileContent(path, ref string) ([]byte, error) {
+func (r *Repository) GetFile(path, branch string) ([]byte, error) {
 	if err := r.OpenGit(); err != nil {
-		return nil, err
+		return nil, NewGitError("Failed to open repository", err)
 	}
 
-	hash := plumbing.NewHash(ref)
-	commit, err := r.git.CommitObject(hash)
+	// Get reference for branch
+	refName := plumbing.NewBranchReferenceName(branch)
+	ref, err := r.git.Reference(refName, true)
 	if err != nil {
-		return nil, err
+		return nil, NewGitError("Failed to get branch reference", err)
 	}
 
+	// Get commit
+	commit, err := r.git.CommitObject(ref.Hash())
+	if err != nil {
+		return nil, NewGitError("Failed to get commit", err)
+	}
+
+	// Get tree
 	tree, err := commit.Tree()
 	if err != nil {
-		return nil, err
+		return nil, NewGitError("Failed to get tree", err)
 	}
 
+	// Get file
 	file, err := tree.File(path)
 	if err != nil {
-		return nil, err
+		if err == object.ErrFileNotFound {
+			return nil, NewNotFoundError("File not found")
+		}
+		return nil, NewGitError("Failed to get file", err)
 	}
 
 	content, err := file.Contents()
 	if err != nil {
-		return nil, err
+		return nil, NewGitError("Failed to read file contents", err)
 	}
+
 	return []byte(content), nil
 }
 
@@ -319,14 +452,14 @@ func (s *Server) ScanRepositories() error {
 
 func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		http.NotFound(w, r)
+		HandleError(w, r, NewNotFoundError("Page not found"))
 		return
 	}
 
 	if err := s.tmpl.ExecuteTemplate(w, "index.html", map[string]interface{}{
 		"Repos": s.Repos,
 	}); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		HandleError(w, r, NewInternalError("Failed to render template").WithError(err))
 	}
 }
 
@@ -338,111 +471,112 @@ func (s *Server) handleListRepos(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(repos); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		HandleError(w, r, NewInternalError("Failed to encode response").WithError(err))
 	}
 }
 
 func (s *Server) handleViewRepo(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	if len(parts) < 2 {
-		http.NotFound(w, r)
+		HandleError(w, r, NewBadRequestError("Invalid repository path"))
 		return
 	}
 
 	repoName := parts[1]
 	repo, ok := s.Repos[repoName]
 	if !ok {
-		http.NotFound(w, r)
+		HandleError(w, r, NewNotFoundError("Repository not found"))
 		return
 	}
 
-	// Get current branch and ref
-	branch := r.URL.Query().Get("branch")
-	if branch == "" {
-		branch = "main" // fallback to main
-	}
-
-	if err := repo.OpenGit(); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	path := strings.Join(parts[2:], "/")
 
 	// Get repository data
 	branches, err := repo.GetBranches()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		HandleError(w, r, NewGitError("Failed to get branches", err))
+		return
+	}
+
+	branch := r.URL.Query().Get("branch")
+	if branch == "" && len(branches) > 0 {
+		branch = branches[0]
+	}
+
+	if branch == "" {
+		HandleError(w, r, NewGitError("No branches found", nil))
 		return
 	}
 
 	ref, err := repo.git.Reference(plumbing.NewBranchReferenceName(branch), true)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		HandleError(w, r, NewGitError("Failed to get branch reference", err))
 		return
 	}
 
-	// Get file tree
-	path := strings.Join(parts[2:], "/")
 	entries, err := repo.GetTree(path, ref.Hash().String())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		HandleError(w, r, NewGitError("Failed to get repository contents", err))
 		return
 	}
 
-	// Get recent commits
-	commits, err := repo.GetCommits(ref.Hash().String(), 10)
+	commits, err := repo.GetCommits(branch, 10)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		HandleError(w, r, NewGitError("Failed to get commits", err))
 		return
 	}
 
 	data := map[string]interface{}{
 		"Repo":     repo,
+		"Path":     path,
 		"Branches": branches,
 		"Branch":   branch,
-		"Path":     path,
 		"Entries":  entries,
 		"Commits":  commits,
 	}
 
 	if err := s.tmpl.ExecuteTemplate(w, "repo.html", data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		HandleError(w, r, NewInternalError("Failed to render template").WithError(err))
 	}
 }
 
 func (s *Server) handleViewFile(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	if len(parts) < 3 {
-		http.NotFound(w, r)
+		HandleError(w, r, NewBadRequestError("Invalid file path"))
 		return
 	}
 
 	repoName := parts[1]
 	repo, ok := s.Repos[repoName]
 	if !ok {
-		http.NotFound(w, r)
-		return
-	}
-
-	branch := r.URL.Query().Get("branch")
-	if branch == "" {
-		branch = "main"
-	}
-
-	if err := repo.OpenGit(); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	ref, err := repo.git.Reference(plumbing.NewBranchReferenceName(branch), true)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		HandleError(w, r, NewNotFoundError("Repository not found"))
 		return
 	}
 
 	path := strings.Join(parts[2:], "/")
-	content, err := repo.GetFileContent(path, ref.Hash().String())
+
+	branch := r.URL.Query().Get("branch")
+	if branch == "" {
+		branches, err := repo.GetBranches()
+		if err != nil {
+			HandleError(w, r, NewGitError("Failed to get branches", err))
+			return
+		}
+		if len(branches) == 0 {
+			HandleError(w, r, NewGitError("No branches found", nil))
+			return
+		}
+		branch = branches[0]
+	}
+
+	content, err := repo.GetFile(path, branch)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		if err == plumbing.ErrObjectNotFound {
+			HandleError(w, r, NewNotFoundError("File not found"))
+		} else {
+			HandleError(w, r, NewGitError("Failed to read file", err))
+		}
 		return
 	}
 
@@ -461,7 +595,7 @@ func (s *Server) handleViewFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := s.tmpl.ExecuteTemplate(w, "file.html", data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		HandleError(w, r, NewInternalError("Failed to render template").WithError(err))
 	}
 }
 
@@ -495,6 +629,21 @@ func parseSymbols(content []byte) []Symbol {
 
 		// Methods
 		{`^[\s]*(?:async\s+)?(?:static\s+)?(?:public\s+)?(?:private\s+)?(?:protected\s+)?(?:def|method)\s+(\w+)`, "method", "⌘"},
+
+		// YAML keys (top level)
+		{`^(\w+):(?:\s|$)`, "property", "⚑"},
+
+		// YAML anchors
+		{`^[\s]*&(\w+)\b`, "anchor", "⚓"},
+
+		// JSON properties (with quotes)
+		{`^[\s]*"(\w+)"\s*:`, "property", "⚑"},
+
+		// JSON/YAML nested objects
+		{`^[\s]*"?(\w+)"?\s*:\s*{`, "object", "⬡"},
+
+		// JSON/YAML arrays
+		{`^[\s]*"?(\w+)"?\s*:\s*\[`, "array", "▤"},
 	}
 
 	for lineNum, line := range lines {
