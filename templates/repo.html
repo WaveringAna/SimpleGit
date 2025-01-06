@@ -59,7 +59,7 @@
                                 {{end}}
                             </td>
                             <td>{{if ne .Type "tree"}}{{formatSize .Size}}{{end}}</td>
-                            <td>{{.Message}}</td>
+                            <td>{{firstLine .Message}}</td>
                         </tr>
                         {{end}}
                     </tbody>
@@ -76,7 +76,7 @@
                             <span class="commit-author">{{.Author}}</span>
                             <span class="commit-date">{{.Timestamp | formatDate}}</span>
                         </div>
-                        <div class="commit-message">{{.Message}}</div>
+                        <div class="commit-message">{{firstLine .Message}}</div>
                     </div>
                     {{end}}
                 </div>

@@ -446,6 +446,12 @@ func NewServer(repoPath string) (*Server, error) {
 		"add": func(a, b int) int {
 			return a + b
 		},
+		"firstLine": func(s string) string {
+			if i := strings.Index(s, "\n"); i != -1 {
+				return s[:i]
+			}
+			return s
+		},
 	}
 
 	// Parse templates
