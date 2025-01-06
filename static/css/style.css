@@ -215,3 +215,106 @@ table.files a:hover {
     line-height: 1.5;
     tab-size: 4;
 }
+
+.file-view {
+    display: grid;
+    grid-template-columns: 1fr 250px;
+    gap: 1rem;
+}
+
+.symbol-sidebar {
+    background: white;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    height: fit-content;
+    position: sticky;
+    top: 1rem;
+}
+
+.symbol-header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e1e4e8;
+    background: #f6f8fa;
+}
+
+.symbol-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.symbol-list {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+.symbol-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    color: #24292e;
+    text-decoration: none;
+    border-bottom: 1px solid #eaecef;
+}
+
+.symbol-item:hover {
+    background: #f6f8fa;
+}
+
+.symbol-type {
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.symbol-name {
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+.code-container {
+    overflow-x: auto;
+}
+
+.line-numbers-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.line-numbers-table tr:hover {
+    background-color: #f6f8fa;
+}
+
+.line-number {
+    padding: 0 1rem;
+    min-width: 40px;
+    text-align: right;
+    color: #6e7781;
+    user-select: none;
+    border-right: 1px solid #e1e4e8;
+}
+
+.line-content {
+    padding: 0 1rem;
+    white-space: pre;
+}
+
+.line-content code {
+    background: transparent !important;
+    padding: 0 !important;
+}
+
+tr.highlighted {
+    background-color: #fff8c5 !important;
+    transition: background-color 0.5s ease;
+}
+
+/* Adjust file content width */
+.file-content {
+    overflow-x: auto;
+    background: white;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+}

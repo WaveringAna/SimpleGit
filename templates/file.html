@@ -28,25 +28,64 @@
     </header>
 
     <main>
-        <div class="file-content">
-            <div class="file-info">
-                <span>{{formatSize .Size}} bytes</span>
+        <div class="file-view">
+            <div class="file-content">
+                <div class="file-info">
+                    <span>{{formatSize .Size}} bytes</span>
+                </div>
+                <div class="code-container">
+                    <table class="line-numbers-table">
+                        <tbody>
+                            {{range $index, $line := .Lines}}
+                            <tr>
+                                <td class="line-number" id="L{{add $index 1}}">{{add $index 1}}</td>
+                                <td class="line-content"><code>{{$line}}</code></td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <pre><code class="file-body">{{.Content}}</code></pre>
+            <div class="symbol-sidebar">
+                <div class="symbol-header">
+                    <h3>Symbols</h3>
+                </div>
+                <div class="symbol-list">
+                    {{range .Symbols}}
+                    <a href="#L{{.Line}}" class="symbol-item {{.Type}}">
+                        <span class="symbol-type">{{.Icon}}</span>
+                        <span class="symbol-name">{{.Name}}</span>
+                    </a>
+                    {{end}}
+                </div>
+            </div>
         </div>
     </main>
 
     <script src="/static/js/highlight.min.js"></script>
     <script>
-        // Detect language from file extension and highlight
         document.addEventListener('DOMContentLoaded', (event) => {
-            const code = document.querySelector('code.file-body');
-            const path = '{{.Path}}';
-            const ext = path.split('.').pop().toLowerCase();
-            if (ext) {
-                code.classList.add(`language-${ext}`);
-                hljs.highlightElement(code);
-            }
+            // Highlight all code cells
+            document.querySelectorAll('.line-content code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+
+            // Add click handlers for symbol navigation
+            document.querySelectorAll('.symbol-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const lineId = item.getAttribute('href');
+                    const lineElement = document.querySelector(lineId);
+                    if (lineElement) {
+                        lineElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        // Add highlight effect
+                        lineElement.closest('tr').classList.add('highlighted');
+                        setTimeout(() => {
+                            lineElement.closest('tr').classList.remove('highlighted');
+                        }, 2000);
+                    }
+                });
+            });
         });
     </script>
 </body>

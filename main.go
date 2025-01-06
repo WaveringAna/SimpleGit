@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -41,6 +42,13 @@ type CommitInfo struct {
 	Email     string    `json:"email"`
 	Message   string    `json:"message"`
 	Timestamp time.Time `json:"timestamp"`
+}
+
+type Symbol struct {
+	Name string
+	Type string // "function", "method", "class", "interface", "const", "var"
+	Icon string
+	Line int
 }
 
 func (r *Repository) OpenGit() error {
@@ -244,6 +252,9 @@ func NewServer(repoPath string) (*Server, error) {
 		"sub": func(a, b int) int {
 			return a - b
 		},
+		"add": func(a, b int) int {
+			return a + b
+		},
 	}
 
 	// Parse templates
@@ -414,16 +425,72 @@ func (s *Server) handleViewFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Split content into lines
+	lines := strings.Split(string(content), "\n")
+
+	// Parse symbols from content
+	symbols := parseSymbols(content)
+
 	data := map[string]interface{}{
 		"Repo":    repo,
 		"Path":    path,
-		"Content": string(content),
+		"Lines":   lines,
 		"Size":    int64(len(content)),
+		"Symbols": symbols,
 	}
 
 	if err := s.tmpl.ExecuteTemplate(w, "file.html", data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+func parseSymbols(content []byte) []Symbol {
+	var symbols []Symbol
+	lines := strings.Split(string(content), "\n")
+
+	// Common patterns across languages
+	patterns := []struct {
+		regex string
+		typ   string
+		icon  string
+	}{
+		// Functions - catches async, static, public, private, etc.
+		{`^[\s]*(?:async\s+)?(?:static\s+)?(?:public\s+)?(?:private\s+)?(?:protected\s+)?(?:function|func)\s+(\w+)`, "function", "ƒ"},
+
+		// Arrow functions with explicit name
+		{`^[\s]*(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\(.*?\)\s*=>`, "function", "ƒ"},
+
+		// Classes/types
+		{`^[\s]*(?:export\s+)?(?:abstract\s+)?(?:class|type)\s+(\w+)`, "class", "◇"},
+
+		// Interfaces
+		{`^[\s]*(?:export\s+)?interface\s+(\w+)`, "interface", "⬡"},
+
+		// Constants
+		{`^[\s]*(?:export\s+)?(?:const|final)\s+(\w+)`, "constant", "□"},
+
+		// Variables
+		{`^[\s]*(?:export\s+)?(?:var|let|private|public|protected)\s+(\w+)`, "variable", "○"},
+
+		// Methods
+		{`^[\s]*(?:async\s+)?(?:static\s+)?(?:public\s+)?(?:private\s+)?(?:protected\s+)?(?:def|method)\s+(\w+)`, "method", "⌘"},
+	}
+
+	for lineNum, line := range lines {
+		for _, pattern := range patterns {
+			re := regexp.MustCompile(pattern.regex)
+			if matches := re.FindStringSubmatch(line); matches != nil {
+				symbols = append(symbols, Symbol{
+					Name: matches[1],
+					Type: pattern.typ,
+					Icon: pattern.icon,
+					Line: lineNum + 1,
+				})
+			}
+		}
+	}
+
+	return symbols
 }
 
 func (s *Server) setupRoutes() {
