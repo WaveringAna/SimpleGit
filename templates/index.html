@@ -18,7 +18,7 @@
                 {{if .Description}}
                 <p>{{.Description}}</p>
                 {{end}}
-                <small>Created: {{.CreatedAt.Format "2006-01-02"}}</small>
+                <small>Created: {{.CreatedAt | formatDate}}</small>
             </div>
             {{else}}
             <p>No repositories found.</p>

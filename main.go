@@ -20,6 +20,25 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
+type Config struct {
+	DevMode     bool   `json:"dev_mode"`
+	Port        int    `json:"port"`
+	DateFormat  string `json:"date_format"` // e.g. "2006-01-02 15:04:05"
+	MaxFileSize int64  `json:"max_file_size"`
+}
+
+var config Config
+
+func init() {
+	data, err := os.ReadFile("config.json")
+	if err != nil {
+		log.Fatal("Failed to read config:", err)
+	}
+	if err := json.Unmarshal(data, &config); err != nil {
+		log.Fatal("Failed to parse config:", err)
+	}
+}
+
 type Repository struct {
 	ID          string    `json:"id"`
 	Name        string    `json:"name"`
@@ -67,14 +86,21 @@ const (
 
 // AppError represents a structured application error
 type AppError struct {
-	Type      ErrorType `json:"type"`
-	Message   string    `json:"message"`
-	Detail    string    `json:"detail,omitempty"`
-	Code      int       `json:"-"` // HTTP status code
-	RequestID string    `json:"request_id,omitempty"`
-	File      string    `json:"file,omitempty"`
-	Line      int       `json:"line,omitempty"`
-	Err       error     `json:"-"`
+	Type       ErrorType `json:"type"`
+	Message    string    `json:"message"`
+	Detail     string    `json:"detail,omitempty"`
+	Code       int       `json:"-"` // HTTP status code
+	RequestID  string    `json:"request_id,omitempty"`
+	File       string    `json:"file,omitempty"`
+	Line       int       `json:"line,omitempty"`
+	Err        error     `json:"-"`
+	ShowInProd bool      `json:"-"` // Whether to show details in production mode
+}
+
+// Add a method to mark errors as production-safe
+func (e *AppError) ShowInProduction() *AppError {
+	e.ShowInProd = true
+	return e
 }
 
 // Error implements the error interface
@@ -148,28 +174,39 @@ func NewGitError(message string, err error) *AppError {
 func HandleError(w http.ResponseWriter, r *http.Request, err error) {
 	var appErr *AppError
 	if !errors.As(err, &appErr) {
-		// Convert regular errors to AppError
 		appErr = NewInternalError("Internal Server Error").WithError(err)
 	}
 
-	// Add request ID if available
-	if requestID := r.Context().Value("requestID"); requestID != nil {
-		appErr.RequestID = requestID.(string)
+	// Build error details for logging
+	details := []string{
+		fmt.Sprintf("Type: %s", appErr.Type),
+		fmt.Sprintf("Message: %s", appErr.Message),
+		fmt.Sprintf("Location: %s:%d", appErr.File, appErr.Line),
 	}
 
-	// Log error with details
-	log.Printf("Error: %s in %s:%d [%s] %v",
-		appErr.Type,
-		appErr.File,
-		appErr.Line,
-		appErr.RequestID,
-		appErr.Err,
-	)
+	if appErr.RequestID != "" {
+		details = append(details, fmt.Sprintf("RequestID: %s", appErr.RequestID))
+	}
+	if appErr.Detail != "" {
+		details = append(details, fmt.Sprintf("Detail: %s", appErr.Detail))
+	}
+	if appErr.Err != nil {
+		details = append(details, fmt.Sprintf("Error: %v", appErr.Err))
+	}
 
-	// Write error response
+	// Log all error details
+	log.Printf("Error occurred:\n\t%s", strings.Join(details, "\n\t"))
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(appErr.Code)
-	json.NewEncoder(w).Encode(appErr)
+
+	if config.DevMode || appErr.ShowInProd {
+		json.NewEncoder(w).Encode(appErr)
+	} else {
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Internal Server Error",
+		})
+	}
 }
 
 func (r *Repository) OpenGit() error {
@@ -399,7 +436,7 @@ func NewServer(repoPath string) (*Server, error) {
 			return fmt.Sprintf("%.1f MB", float64(size)/(1024*1024))
 		},
 		"formatDate": func(t time.Time) string {
-			return t.Format("Jan 02, 2006 15:04:05")
+			return t.Format(config.DateFormat)
 		},
 		"split": strings.Split,
 		"dir":   filepath.Dir,
@@ -452,7 +489,7 @@ func (s *Server) ScanRepositories() error {
 
 func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		HandleError(w, r, NewNotFoundError("Page not found"))
+		HandleError(w, r, NewNotFoundError("Page not found").WithDetail(fmt.Sprintf("Path: %s", r.URL.Path)))
 		return
 	}
 
@@ -485,7 +522,7 @@ func (s *Server) handleViewRepo(w http.ResponseWriter, r *http.Request) {
 	repoName := parts[1]
 	repo, ok := s.Repos[repoName]
 	if !ok {
-		HandleError(w, r, NewNotFoundError("Repository not found"))
+		HandleError(w, r, NewNotFoundError("Repository not found").WithDetail(fmt.Sprintf("Repository: %s", repoName)))
 		return
 	}
 
@@ -540,6 +577,22 @@ func (s *Server) handleViewRepo(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// isBinaryFile checks if the content appears to be a binary file
+func isBinaryFile(content []byte) bool {
+	// Check first 512 bytes for null bytes or non-printable characters
+	size := len(content)
+	if size > 512 {
+		size = 512
+	}
+
+	for i := 0; i < size; i++ {
+		if content[i] == 0 || (content[i] < 32 && content[i] != '\n' && content[i] != '\r' && content[i] != '\t') {
+			return true
+		}
+	}
+	return false
+}
+
 func (s *Server) handleViewFile(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	if len(parts) < 3 {
@@ -550,7 +603,7 @@ func (s *Server) handleViewFile(w http.ResponseWriter, r *http.Request) {
 	repoName := parts[1]
 	repo, ok := s.Repos[repoName]
 	if !ok {
-		HandleError(w, r, NewNotFoundError("Repository not found"))
+		HandleError(w, r, NewNotFoundError("Repository not found").WithDetail(fmt.Sprintf("Repository: %s", repoName)))
 		return
 	}
 
@@ -576,6 +629,34 @@ func (s *Server) handleViewFile(w http.ResponseWriter, r *http.Request) {
 			HandleError(w, r, NewNotFoundError("File not found"))
 		} else {
 			HandleError(w, r, NewGitError("Failed to read file", err))
+		}
+		return
+	}
+
+	// Check if file is binary
+	if isBinaryFile(content) {
+		w.Header().Set("Content-Type", "text/html")
+		data := map[string]interface{}{
+			"Title":   "Binary File",
+			"Message": "This appears to be a binary file and cannot be displayed.",
+			"Detail":  fmt.Sprintf("File size: %d bytes\nYou can download or view this file with an appropriate application.", len(content)),
+		}
+		if err := s.tmpl.ExecuteTemplate(w, "error.html", data); err != nil {
+			HandleError(w, r, NewInternalError("Failed to render template").WithError(err))
+		}
+		return
+	}
+
+	// Check file size before rendering
+	if int64(len(content)) > config.MaxFileSize {
+		w.Header().Set("Content-Type", "text/html")
+		data := map[string]interface{}{
+			"Title":   "File Too Large",
+			"Message": "This file exceeds the maximum size limit for display.",
+			"Detail":  fmt.Sprintf("File size: %d bytes\nMaximum allowed: %d bytes", len(content), config.MaxFileSize),
+		}
+		if err := s.tmpl.ExecuteTemplate(w, "error.html", data); err != nil {
+			HandleError(w, r, NewInternalError("Failed to render template").WithError(err))
 		}
 		return
 	}
@@ -668,6 +749,15 @@ func (s *Server) setupRoutes() {
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
+	// Favicon - either serve it or return 404 without logging
+	http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := os.Stat("static/favicon.ico"); err == nil {
+			http.ServeFile(w, r, "static/favicon.ico")
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	})
+
 	// HTML routes
 	http.HandleFunc("/", s.handleIndex)
 	http.HandleFunc("/repo/", s.handleViewRepo)
@@ -689,8 +779,9 @@ func main() {
 
 	server.setupRoutes()
 
-	log.Println("Server starting on :3000")
-	if err := http.ListenAndServe(":3000", nil); err != nil {
+	addr := fmt.Sprintf(":%d", config.Port)
+	log.Printf("Server starting on %s (dev mode: %v)", addr, config.DevMode)
+	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatal(err)
 	}
 }

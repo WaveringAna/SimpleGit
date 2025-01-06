@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Error - Git Server</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1><a href="/">Git Server</a></h1>
+        </div>
+    </header>
+
+    <main>
+        <div class="error-container">
+            <h2>{{.Title}}</h2>
+            <p>{{.Message}}</p>
+            {{if .Detail}}
+            <pre class="error-detail">{{.Detail}}</pre>
+            {{end}}
+            <p><a href="javascript:history.back()">Go Back</a></p>
+        </div>
+    </main>
+</body>
+</html>

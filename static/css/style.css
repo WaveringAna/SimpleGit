@@ -396,3 +396,37 @@ tr.highlighted {
 .hljs-class {
     color: #56B6C2;
 }
+
+.error-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #262931;
+    border: 1px solid #2E323A;
+    border-radius: 6px;
+}
+
+.error-container h2 {
+    color: #E5E9F0;
+    margin-top: 0;
+}
+
+.error-container p {
+    color: #ABB2BF;
+}
+
+.error-detail {
+    background: #1F2126;
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+}
+
+.error-container a {
+    color: #61AFEF;
+    text-decoration: none;
+}
+
+.error-container a:hover {
+    text-decoration: underline;
+}
