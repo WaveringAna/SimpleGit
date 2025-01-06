@@ -1,0 +1,31 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Git Server</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Repositories</h1>
+    </header>
+
+    <main>
+        <div class="repo-list">
+            {{range .Repos}}
+            <div class="repo-item">
+                <h2><a href="/repo/{{.Name}}">{{.Name}}</a></h2>
+                {{if .Description}}
+                <p>{{.Description}}</p>
+                {{end}}
+                <small>Created: {{.CreatedAt.Format "2006-01-02"}}</small>
+            </div>
+            {{else}}
+            <p>No repositories found.</p>
+            {{end}}
+        </div>
+    </main>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

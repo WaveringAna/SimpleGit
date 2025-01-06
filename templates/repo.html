@@ -1,0 +1,87 @@
+<!-- templates/repo.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{.Repo.Name}} - Git Server</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1><a href="/">Git Server</a> / {{.Repo.Name}}</h1>
+            <div class="branch-selector">
+                <select onchange="window.location.href='?branch=' + this.value">
+                    {{range .Branches}}
+                    <option value="{{.}}" {{if eq . $.Branch}}selected{{end}}>{{.}}</option>
+                    {{end}}
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="repo-content">
+            <div class="file-browser">
+                <div class="path-nav">
+                    <a href="/repo/{{.Repo.Name}}">{{.Repo.Name}}</a>
+                    {{$repo := .Repo.Name}}
+                    {{$parts := split .Path "/"}}
+                    {{$path := ""}}
+                    {{range $parts}}
+                        {{$path = printf "%s/%s" $path .}}
+                        / <a href="/repo/{{$repo}}{{$path}}">{{.}}</a>
+                    {{end}}
+                </div>
+
+                <table class="files">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Size</th>
+                            <th>Last Commit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{if .Path}}
+                        <tr>
+                            <td><a href="/repo/{{.Repo.Name}}/{{dir .Path}}">..</a></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        {{end}}
+                        {{range .Entries}}
+                        <tr>
+                            <td>
+                                {{if eq .Type "tree"}}
+                                <a href="/repo/{{$.Repo.Name}}/{{.Path}}">📁 {{.Name}}/</a>
+                                {{else}}
+                                <a href="/file/{{$.Repo.Name}}/{{.Path}}">📄 {{.Name}}</a>
+                                {{end}}
+                            </td>
+                            <td>{{if ne .Type "tree"}}{{formatSize .Size}}{{end}}</td>
+                            <td>{{.Message}}</td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="commit-history">
+                <h2>Recent Commits</h2>
+                <div class="commits">
+                    {{range .Commits}}
+                    <div class="commit">
+                        <div class="commit-header">
+                            <span class="commit-hash">{{slice .Hash 0 7}}</span>
+                            <span class="commit-author">{{.Author}}</span>
+                            <span class="commit-date">{{formatDate .Timestamp}}</span>
+                        </div>
+                        <div class="commit-message">{{.Message}}</div>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

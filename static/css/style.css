@@ -1,0 +1,217 @@
+/* static/css/style.css */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+header {
+    background: #24292e;
+    color: white;
+    padding: 1rem 2rem;
+}
+
+header h1 {
+    margin: 0;
+}
+
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.repo-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.repo-item {
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    padding: 1rem;
+    background: white;
+}
+
+.repo-item h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+}
+
+.repo-item h2 a {
+    color: #0366d6;
+    text-decoration: none;
+}
+
+.repo-item h2 a:hover {
+    text-decoration: underline;
+}
+
+.repo-item p {
+    margin: 0.5rem 0;
+    color: #586069;
+}
+
+.repo-item small {
+    color: #6a737d;
+}
+
+/* Repository view styles */
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-content h1 {
+    font-size: 1.5rem;
+}
+
+.header-content h1 a {
+    color: white;
+    text-decoration: none;
+}
+
+.header-content h1 a:hover {
+    text-decoration: underline;
+}
+
+.branch-selector select {
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #444;
+    background: #333;
+    color: white;
+}
+
+.repo-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+}
+
+.file-browser {
+    background: white;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+}
+
+.path-nav {
+    padding: 1rem;
+    border-bottom: 1px solid #e1e4e8;
+    background: #f6f8fa;
+}
+
+.path-nav a {
+    color: #0366d6;
+    text-decoration: none;
+}
+
+.path-nav a:hover {
+    text-decoration: underline;
+}
+
+table.files {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table.files th,
+table.files td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e1e4e8;
+}
+
+table.files th {
+    text-align: left;
+    background: #f6f8fa;
+    font-weight: 600;
+}
+
+table.files tr:hover {
+    background: #f6f8fa;
+}
+
+table.files a {
+    color: #0366d6;
+    text-decoration: none;
+}
+
+table.files a:hover {
+    text-decoration: underline;
+}
+
+.commit-history {
+    background: white;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+}
+
+.commit-history h2 {
+    margin: 0;
+    padding: 1rem;
+    border-bottom: 1px solid #e1e4e8;
+    font-size: 1.2rem;
+    background: #f6f8fa;
+}
+
+.commits {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.commit {
+    padding: 1rem;
+    border-bottom: 1px solid #e1e4e8;
+}
+
+.commit:last-child {
+    border-bottom: none;
+}
+
+.commit-header {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: #586069;
+    margin-bottom: 0.5rem;
+}
+
+.commit-hash {
+    font-family: monospace;
+    color: #0366d6;
+}
+
+.commit-message {
+    color: #24292e;
+    white-space: pre-line;
+}
+
+/* File view styles */
+.file-content {
+    background: white;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+}
+
+.file-info {
+    padding: 1rem;
+    border-bottom: 1px solid #e1e4e8;
+    background: #f6f8fa;
+    color: #586069;
+}
+
+.file-body {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    tab-size: 4;
+}

@@ -1,0 +1,53 @@
+<!-- templates/file.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{.Path}} - {{.Repo.Name}} - Git Server</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/default.min.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>
+                <a href="/">Git Server</a> / 
+                <a href="/repo/{{.Repo.Name}}">{{.Repo.Name}}</a> /
+                {{$repo := .Repo.Name}}
+                {{$parts := split .Path "/"}}
+                {{$path := ""}}
+                {{range $i, $part := $parts}}
+                    {{if lt $i (sub (len $parts) 1)}}
+                        {{$path = printf "%s/%s" $path $part}}
+                        <a href="/repo/{{$repo}}{{$path}}">{{$part}}</a> /
+                    {{else}}
+                        {{$part}}
+                    {{end}}
+                {{end}}
+            </h1>
+        </div>
+    </header>
+
+    <main>
+        <div class="file-content">
+            <div class="file-info">
+                <span>{{formatSize .Size}} bytes</span>
+            </div>
+            <pre><code class="file-body">{{.Content}}</code></pre>
+        </div>
+    </main>
+
+    <script src="/static/js/highlight.min.js"></script>
+    <script>
+        // Detect language from file extension and highlight
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const code = document.querySelector('code.file-body');
+            const path = '{{.Path}}';
+            const ext = path.split('.').pop().toLowerCase();
+            if (ext) {
+                code.classList.add(`language-${ext}`);
+                hljs.highlightElement(code);
+            }
+        });
+    </script>
+</body>
+</html>
