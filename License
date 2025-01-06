@@ -1,5 +1,6 @@
 Libraries Used:
-highlight.js - https://github.com/highlightjs/highlight.js - BSD Zero Clause License
+highlight.js - https://github.com/highlightjs/highlight.js - BSD Three Clause License
+htmx - https://htmx.org/ - BSD Zero Clause License
 go-git - https://github.com/go-git/go-git - Apache License 2.0
 
 This is free and unencumbered software released into the public domain.
