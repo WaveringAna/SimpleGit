@@ -93,20 +93,53 @@ func (r *Repository) GetTree(path, ref string) ([]TreeEntry, error) {
 	}
 
 	var entries []TreeEntry
+
+	// First add directories
 	err = tree.Files().ForEach(func(f *object.File) error {
-		// Skip files not in the current path
 		if path != "" && !strings.HasPrefix(f.Name, path) {
 			return nil
 		}
 
-		entries = append(entries, TreeEntry{
-			Name:    filepath.Base(f.Name),
-			Path:    f.Name,
-			Type:    "blob",
-			Size:    f.Size,
-			Commit:  commit.Hash.String(),
-			Message: commit.Message,
-		})
+		dir := filepath.Dir(f.Name)
+		if dir != "." && dir != path {
+			// Get the immediate subdirectory
+			parts := strings.Split(strings.TrimPrefix(dir, path), string(filepath.Separator))
+			if len(parts) > 0 {
+				dirName := parts[0]
+				if dirName != "" {
+					// Check if directory is already added
+					exists := false
+					for _, entry := range entries {
+						if entry.Name == dirName && entry.Type == "tree" {
+							exists = true
+							break
+						}
+					}
+					if !exists {
+						entries = append(entries, TreeEntry{
+							Name:    dirName,
+							Path:    filepath.Join(path, dirName),
+							Type:    "tree",
+							Size:    0,
+							Commit:  commit.Hash.String(),
+							Message: commit.Message,
+						})
+					}
+				}
+			}
+		}
+
+		// Add files in current directory
+		if filepath.Dir(f.Name) == path || (path == "" && filepath.Dir(f.Name) == ".") {
+			entries = append(entries, TreeEntry{
+				Name:    filepath.Base(f.Name),
+				Path:    f.Name,
+				Type:    "blob",
+				Size:    f.Size,
+				Commit:  commit.Hash.String(),
+				Message: commit.Message,
+			})
+		}
 		return nil
 	})
 
