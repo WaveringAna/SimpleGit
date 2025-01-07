@@ -300,13 +300,33 @@ func (r *Repository) GetTree(path, ref string) ([]TreeEntry, error) {
 			}
 		} else {
 			// This is a file in the current directory
+			// Get the last commit for this file
+			fileCommit, err := r.git.Log(&git.LogOptions{From: commit.Hash, Order: git.LogOrderCommitterTime, FileName: &f.Name})
+			if err != nil {
+				return err
+			}
+
+			var lastCommitMessage string
+			first := true
+			err = fileCommit.ForEach(func(c *object.Commit) error {
+				if first {
+					lastCommitMessage = c.Message
+					first = false
+					return errors.New("got latest commit") // Stop after first commit since log is ordered by time
+				}
+				return nil
+			})
+			if err != nil && err.Error() != "got latest commit" {
+				return err
+			}
+
 			entries = append(entries, TreeEntry{
 				Name:    f.Name[strings.LastIndex(f.Name, "/")+1:],
 				Path:    f.Name,
 				Type:    "blob",
 				Size:    f.Size,
 				Commit:  commit.Hash.String(),
-				Message: commit.Message,
+				Message: lastCommitMessage,
 			})
 		}
 		return nil
