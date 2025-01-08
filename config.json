@@ -4,5 +4,7 @@
     "date_format": "Jan 2, 2006 15:04:05",
     "date_format_comment": "See https://pkg.go.dev/time#pkg-constants for format options",
     "max_file_size": 20485760,
-    "max_file_size_comment": "Maximum file size to display in bytes (10 MB)"
+    "max_file_size_comment": "Maximum file size to display in bytes (10 MB)",
+    "data_dir": "data",
+    "jwt_secret": "jfd29am3"
 }

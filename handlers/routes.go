@@ -1,3 +1,5 @@
+//handlers/routes.go
+
 package handlers
 
 import (
@@ -24,6 +26,18 @@ func (s *Server) SetupRoutes() {
 	http.HandleFunc("/repo/", s.handleViewRepo)
 	http.HandleFunc("/file/", s.handleViewFile)
 
+	//Auth Route
+	http.HandleFunc("/login", s.handleLogin)
+	http.HandleFunc("/logout", s.handleLogout)
+
 	// API routes
-	http.HandleFunc("/api/repos", s.handleListRepos)
+	http.HandleFunc("/api/repos", s.requireAuth(s.handleListRepos))
+
+	// Admin routes
+	http.HandleFunc("/setup-admin", s.handleAdminSetup)
+	http.HandleFunc("/admin", s.requireAdmin(s.handleAdminDashboard))
+	http.HandleFunc("/admin/repos", s.requireAdmin(s.handleAdminRepos))
+	http.HandleFunc("/admin/users", s.requireAdmin(s.handleAdminUsers))
+	http.HandleFunc("/admin/users/create", s.requireAdmin(s.handleCreateUser))
+	http.HandleFunc("/admin/repos/create", s.requireAdmin(s.handleCreateRepo))
 }

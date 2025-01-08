@@ -1,7 +1,11 @@
+//models/repository.go
+
 package models
 
 import (
+	config "SimpleGit/config"
 	"errors"
+	"fmt"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -18,6 +22,7 @@ type Repository struct {
 	Path        string    `json:"path"`
 	Description string    `json:"description"`
 	CreatedAt   time.Time `json:"created_at"`
+	Size        int64     `json:"size"`
 	git         *git.Repository
 }
 
@@ -30,6 +35,15 @@ type TreeEntry struct {
 	Message string `json:"message"`
 }
 
+type Commit struct {
+	Hash      string
+	Message   string
+	Author    string
+	Email     string
+	Date      time.Time
+	ShortHash string // First 7 characters of the hash
+}
+
 type CommitInfo struct {
 	Hash      string    `json:"hash"`
 	Author    string    `json:"author"`
@@ -38,7 +52,7 @@ type CommitInfo struct {
 	Timestamp time.Time `json:"timestamp"`
 }
 
-func (r *Repository) OpenGit() error {
+func (r *Repository) initGit() error {
 	if r.git != nil {
 		return nil
 	}
@@ -47,19 +61,20 @@ func (r *Repository) OpenGit() error {
 	if err != nil {
 		return err
 	}
+
 	r.git = repo
 	return nil
 }
 
 func (r *Repository) Git() (*git.Repository, error) {
-	if err := r.OpenGit(); err != nil {
+	if err := r.initGit(); err != nil {
 		return nil, err
 	}
 	return r.git, nil
 }
 
 func (r *Repository) GetTree(path, ref string) ([]TreeEntry, error) {
-	if err := r.OpenGit(); err != nil {
+	if err := r.initGit(); err != nil {
 		return nil, err
 	}
 
@@ -169,7 +184,7 @@ func (r *Repository) GetTree(path, ref string) ([]TreeEntry, error) {
 }
 
 func (r *Repository) GetCommits(ref string, limit int) ([]CommitInfo, error) {
-	if err := r.OpenGit(); err != nil {
+	if err := r.initGit(); err != nil {
 		return nil, err
 	}
 
@@ -204,7 +219,7 @@ func (r *Repository) GetCommits(ref string, limit int) ([]CommitInfo, error) {
 }
 
 func (r *Repository) GetFile(path, branch string) ([]byte, error) {
-	if err := r.OpenGit(); err != nil {
+	if err := r.initGit(); err != nil {
 		return nil, NewGitError("Failed to open repository", err)
 	}
 
@@ -245,8 +260,13 @@ func (r *Repository) GetFile(path, branch string) ([]byte, error) {
 }
 
 func (r *Repository) GetBranches() ([]string, error) {
-	if err := r.OpenGit(); err != nil {
+	if err := r.initGit(); err != nil {
 		return nil, err
+	}
+
+	// If repository is empty, return empty slice
+	if r.git == nil {
+		return []string{}, nil
 	}
 
 	branches := []string{}
@@ -260,6 +280,23 @@ func (r *Repository) GetBranches() ([]string, error) {
 		branches = append(branches, name)
 		return nil
 	})
+	if err != nil {
+		return nil, err
+	}
 
-	return branches, err
+	return branches, nil
+}
+
+func (r *Repository) CloneURL() string {
+	// For development/local setup
+	if config.GlobalConfig.Domain == "localhost" {
+		return fmt.Sprintf("http://localhost:%d/repo/%s.git",
+			config.GlobalConfig.Port,
+			r.Name)
+	}
+
+	// For production setup
+	return fmt.Sprintf("http://%s/repo/%s.git",
+		config.GlobalConfig.Domain,
+		r.Name)
 }

@@ -1,3 +1,5 @@
+//handlers/handlers.go
+
 package handlers
 
 import (
@@ -15,12 +17,16 @@ import (
 	"SimpleGit/utils"
 
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type Server struct {
-	RepoPath string
-	Repos    map[string]*models.Repository
-	tmpl     *template.Template
+	RepoPath    string
+	Repos       map[string]*models.Repository
+	tmpl        *template.Template
+	userService *models.UserService
+	db          *gorm.DB
 }
 
 func NewServer(repoPath string) (*Server, error) {
@@ -79,9 +85,17 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := s.tmpl.ExecuteTemplate(w, "index.html", map[string]interface{}{
+	// Ensure all repositories are loaded
+	if err := s.ScanRepositories(); err != nil {
+		models.HandleError(w, r, models.NewInternalError("Failed to scan repositories").WithError(err))
+		return
+	}
+
+	data := map[string]interface{}{
 		"Repos": s.Repos,
-	}); err != nil {
+	}
+
+	if err := s.tmpl.ExecuteTemplate(w, "index.html", data); err != nil {
 		models.HandleError(w, r, models.NewInternalError("Failed to render template").WithError(err))
 	}
 }
@@ -108,8 +122,17 @@ func (s *Server) handleViewRepo(w http.ResponseWriter, r *http.Request) {
 	repoName := parts[1]
 	repo, ok := s.Repos[repoName]
 	if !ok {
-		models.HandleError(w, r, models.NewNotFoundError("Repository not found").WithDetail(fmt.Sprintf("Repository: %s", repoName)))
-		return
+		// Try to rescan repositories in case it was just created
+		if err := s.ScanRepositories(); err != nil {
+			models.HandleError(w, r, models.NewInternalError("Failed to scan repositories").WithError(err))
+			return
+		}
+
+		repo, ok = s.Repos[repoName]
+		if !ok {
+			models.HandleError(w, r, models.NewNotFoundError("Repository not found").WithDetail(fmt.Sprintf("Repository: %s", repoName)))
+			return
+		}
 	}
 
 	path := strings.Join(parts[2:], "/")
@@ -117,18 +140,31 @@ func (s *Server) handleViewRepo(w http.ResponseWriter, r *http.Request) {
 	// Get repository data
 	branches, err := repo.GetBranches()
 	if err != nil {
-		models.HandleError(w, r, models.NewGitError("Failed to get branches", err))
+		// Don't treat this as an error for empty repos
+		branches = []string{}
+	}
+
+	// Handle empty repository case
+	if len(branches) == 0 {
+		data := map[string]interface{}{
+			"Repo":     repo,
+			"Path":     path,
+			"Branches": []string{},
+			"Branch":   "",
+			"Entries":  []models.TreeEntry{},
+			"Commits":  []models.Commit{},
+			"IsEmpty":  true,
+		}
+
+		if err := s.tmpl.ExecuteTemplate(w, "repo.html", data); err != nil {
+			models.HandleError(w, r, models.NewInternalError("Failed to render template").WithError(err))
+		}
 		return
 	}
 
 	branch := r.URL.Query().Get("branch")
-	if branch == "" && len(branches) > 0 {
-		branch = branches[0]
-	}
-
 	if branch == "" {
-		models.HandleError(w, r, models.NewGitError("No branches found", nil))
-		return
+		branch = branches[0]
 	}
 
 	gitRepo, err := repo.Git()
@@ -143,7 +179,6 @@ func (s *Server) handleViewRepo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get the hash string from the reference
 	hashStr := ref.Hash().String()
 
 	entries, err := repo.GetTree(path, hashStr)
@@ -165,6 +200,7 @@ func (s *Server) handleViewRepo(w http.ResponseWriter, r *http.Request) {
 		"Branch":   branch,
 		"Entries":  entries,
 		"Commits":  commits,
+		"IsEmpty":  false,
 	}
 
 	if err := s.tmpl.ExecuteTemplate(w, "repo.html", data); err != nil {
@@ -265,25 +301,77 @@ func (s *Server) ScanRepositories() error {
 		return fmt.Errorf("failed to read repo directory: %w", err)
 	}
 
+	// Create a new map to avoid duplicates
+	repos := make(map[string]*models.Repository)
+
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			continue
 		}
 
-		// Check if it's a git repository
-		gitDir := filepath.Join(s.RepoPath, entry.Name(), ".git")
-		if _, err := os.Stat(gitDir); os.IsNotExist(err) {
+		name := entry.Name()
+		path := filepath.Join(s.RepoPath, name)
+
+		// Check if it's a git repository (has .git directory or is a bare repo)
+		_, errGit := os.Stat(filepath.Join(path, ".git"))
+		_, errBare := os.Stat(filepath.Join(path, "HEAD"))
+
+		if os.IsNotExist(errGit) && os.IsNotExist(errBare) {
 			continue
 		}
 
-		// Add to our cache
-		s.Repos[entry.Name()] = &models.Repository{
-			ID:        entry.Name(), // Use name as ID for now
-			Name:      entry.Name(),
-			Path:      filepath.Join(s.RepoPath, entry.Name()),
-			CreatedAt: time.Now(), // We'll get this from git later
+		// Get repository info
+		info, err := entry.Info()
+		if err != nil {
+			continue
+		}
+
+		// Add or update repository
+		if existing, ok := s.Repos[name]; ok {
+			// Update existing repository
+			existing.Path = path
+			existing.Size = info.Size()
+			repos[name] = existing
+		} else {
+			// Create new repository entry
+			repos[name] = &models.Repository{
+				ID:        name,
+				Name:      name,
+				Path:      path,
+				CreatedAt: info.ModTime(),
+				Size:      info.Size(),
+			}
 		}
 	}
 
+	// Update the server's repository map
+	s.Repos = repos
 	return nil
+}
+
+func (s *Server) InitAdminSetup() error {
+	// Check if admin exists
+	adminCount, err := s.userService.GetAdminCount()
+	if err != nil {
+		return err
+	}
+
+	if adminCount == 0 {
+		// Generate setup token
+		setupToken := uuid.New().String()
+		if err := os.WriteFile("admin_setup_token.txt", []byte(setupToken), 0600); err != nil {
+			return fmt.Errorf("failed to create admin setup token: %w", err)
+		}
+		fmt.Printf("Admin setup token created: %s\n", setupToken)
+	}
+
+	return nil
+}
+
+func (s *Server) SetDB(db *gorm.DB) {
+	s.db = db
+}
+
+func (s *Server) SetUserService(userService *models.UserService) {
+	s.userService = userService
 }

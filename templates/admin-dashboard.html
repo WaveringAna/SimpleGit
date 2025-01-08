@@ -1,0 +1,62 @@
+<!-- templates/admin-dashboard.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard - Git Server</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1><a href="/">Git Server</a> / Admin</h1>
+            <nav class="admin-nav">
+                <a href="/admin" class="active">Dashboard</a>
+                <a href="/admin/repos">Repositories</a>
+                <a href="/admin/users">Users</a>
+                <a href="/logout">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="admin-dashboard">
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <h3>Repositories</h3>
+                    <div class="stat-value">{{len .Repos}}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Users</h3>
+                    <div class="stat-value">{{len .Users}}</div>
+                </div>
+            </div>
+
+            <div class="admin-grid">
+                <div class="admin-section">
+                    <h2>Recent Repositories</h2>
+                    <div class="repo-list">
+                        {{range $name, $repo := .Repos}}
+                        <div class="repo-item compact">
+                            <h3><a href="/repo/{{$name}}">{{$name}}</a></h3>
+                            <small>Created: {{.CreatedAt | formatDate}}</small>
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+
+                <div class="admin-section">
+                    <h2>Recent Users</h2>
+                    <div class="user-list">
+                        {{range .Users}}
+                        <div class="user-item">
+                            <div class="user-email">{{.Email}}</div>
+                            <div class="user-role">{{if .IsAdmin}}Admin{{else}}User{{end}}</div>
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

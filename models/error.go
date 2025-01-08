@@ -1,3 +1,5 @@
+//models/error.go
+
 package models
 
 import (

@@ -1,0 +1,73 @@
+<!-- templates/admin-repos.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Repository Management - Git Server</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1><a href="/">Git Server</a> / Admin</h1>
+            <nav class="admin-nav">
+                <a href="/admin">Dashboard</a>
+                <a href="/admin/repos" class="active">Repositories</a>
+                <a href="/admin/users">Users</a>
+                <a href="/logout">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="admin-container">
+            <div class="action-bar">
+                <h2>Repository Management</h2>
+                <button class="create-btn" onclick="location.href='/admin/repos/create'">Create Repository</button>
+            </div>
+
+            <div class="repo-list admin-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Created</th>
+                            <th>Size</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range $name, $repo := .Repos}}
+                        <tr>
+                            <td><a href="/repo/{{$name}}">{{$name}}</a></td>
+                            <td>{{.CreatedAt | formatDate}}</td>
+                            <td>{{.Size | formatSize}}</td>
+                            <td class="actions">
+                                <button onclick="location.href='/admin/repos/{{$name}}/edit'" class="edit-btn">Edit</button>
+                                <button onclick="deleteRepo('{{$name}}')" class="delete-btn">Delete</button>
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    function deleteRepo(name) {
+        if (confirm('Are you sure you want to delete repository "' + name + '"? This cannot be undone.')) {
+            fetch('/admin/repos/' + name, {
+                method: 'DELETE',
+                credentials: 'same-origin'
+            }).then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('Failed to delete repository');
+                }
+            });
+        }
+    }
+    </script>
+</body>
+</html>

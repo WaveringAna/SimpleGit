@@ -9,6 +9,7 @@
     <header>
         <div class="header-content">
             <h1><a href="/">Git Server</a> / {{.Repo.Name}}</h1>
+            {{if not .IsEmpty}}
             <div class="branch-selector">
                 <select onchange="window.location.href='?branch=' + this.value">
                     {{range .Branches}}
@@ -16,10 +17,24 @@
                     {{end}}
                 </select>
             </div>
+            {{end}}
         </div>
     </header>
 
     <main>
+        {{if .IsEmpty}}
+        <div class="empty-repo">
+            <h2>Empty Repository</h2>
+            <p>This repository is empty. To get started, clone this repository and push your first commit:</p>
+            <pre class="command-block">
+git clone {{.Repo.CloneURL}}
+cd {{.Repo.Name}}
+# make some changes
+git add .
+git commit -m "Initial commit"
+git push origin main</pre>
+        </div>
+        {{else}}
         <div class="repo-content">
             <div class="file-browser">
                 <div class="path-nav">
@@ -82,6 +97,7 @@
                 </div>
             </div>
         </div>
+        {{end}}
     </main>
 </body>
 </html>

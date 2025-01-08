@@ -1,0 +1,44 @@
+<!-- templates/admin-setup.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Setup - Git Server</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1><a href="/">Git Server</a></h1>
+        </div>
+    </header>
+
+    <main>
+        <div class="error-container">
+            <h2>Initial Admin Setup</h2>
+            <p>Please set up the administrator account using the setup token provided in the server console.</p>
+            
+            {{if .Error}}
+            <div class="error-message">
+                {{.Error}}
+            </div>
+            {{end}}
+            
+            <form method="POST" action="/setup-admin">
+                <div class="form-group">
+                    <label for="setup_token">Setup Token:</label>
+                    <input type="text" id="setup_token" name="setup_token" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Admin Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit">Create Admin Account</button>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

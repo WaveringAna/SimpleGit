@@ -1,3 +1,5 @@
+//config/config.go
+
 package config
 
 import (
@@ -11,6 +13,9 @@ type Config struct {
 	Port        int    `json:"port"`
 	DateFormat  string `json:"date_format"`
 	MaxFileSize int64  `json:"max_file_size"`
+	DataDir     string `json:"data_dir"`
+	JWTSecret   string `json:"jwt_secret"`
+	Domain      string `json:"domain"`
 }
 
 var GlobalConfig Config
@@ -22,5 +27,10 @@ func Init() {
 	}
 	if err := json.Unmarshal(data, &GlobalConfig); err != nil {
 		log.Fatal("Failed to parse config:", err)
+	}
+
+	// Set default domain if not specified
+	if GlobalConfig.Domain == "" {
+		GlobalConfig.Domain = "localhost"
 	}
 }
