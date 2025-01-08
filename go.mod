@@ -4,7 +4,6 @@ go 1.21
 
 require (
 	github.com/go-git/go-git/v5 v5.13.1
-	gopkg.in/src-d/go-git.v4 v4.13.1
 )
 
 require (
