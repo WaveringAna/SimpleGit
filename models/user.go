@@ -3,9 +3,11 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -33,19 +35,25 @@ func NewUserService(db *gorm.DB, jwtKey []byte) *UserService {
 }
 
 func (s *UserService) CreateUser(email, password string, isAdmin bool) (*User, error) {
+	// Hash the password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 
+	// Create new user with UUID
 	user := &User{
-		Email:    email,
-		Password: string(hashedPassword),
-		IsAdmin:  isAdmin,
+		ID:        uuid.New().String(),
+		Email:     email,
+		Password:  string(hashedPassword),
+		IsAdmin:   isAdmin,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
+	// Save to database
 	if err := s.db.Create(user).Error; err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
 	return user, nil

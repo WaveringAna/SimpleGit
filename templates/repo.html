@@ -4,6 +4,8 @@
 <head>
     <title>{{.Repo.Name}} - Git Server</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
     <header>
@@ -68,9 +70,9 @@ git push origin main</pre>
                         <tr>
                             <td>
                                 {{if eq .Type "tree"}}
-                                <a href="/repo/{{$.Repo.Name}}/{{.Path}}">📁 {{.Name}}/</a>
+                                <a href="/repo/{{$.Repo.Name}}/{{.Path}}"><i class="fa-regular fa-folder"></i> {{.Name}}/</a>
                                 {{else}}
-                                <a href="/file/{{$.Repo.Name}}/{{.Path}}">📄 {{.Name}}</a>
+                                <a href="/file/{{$.Repo.Name}}/{{.Path}}"><i class="{{getFileIcon .Name}}"></i> {{.Name}}</a>
                                 {{end}}
                             </td>
                             <td>{{if ne .Type "tree"}}{{formatSize .Size}}{{end}}</td>

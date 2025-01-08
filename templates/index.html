@@ -4,10 +4,23 @@
 <head>
     <title>Git Server</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
     <header>
-        <h1>Repositories</h1>
+        <div class="header-content">
+            <h1>Repositories</h1>
+            <nav class="user-nav">
+                {{if .User}}
+                    {{if .User.IsAdmin}}
+                    <a href="/admin" title="Admin Dashboard"><i class="fa-solid fa-gauge-high"></i></a>
+                    {{end}}
+                    <a href="/logout" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></a>
+                {{else}}
+                    <a href="/login" title="Login"><i class="fa-solid fa-right-to-bracket"></i></a>
+                {{end}}
+            </nav>
+        </div>
     </header>
 
     <main>

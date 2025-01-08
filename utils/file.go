@@ -3,6 +3,7 @@
 package utils
 
 import (
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -90,4 +91,38 @@ func ParseSymbols(content []byte) []Symbol {
 	}
 
 	return symbols
+}
+
+func GetFileIcon(name string) string {
+	ext := strings.ToLower(filepath.Ext(name))
+	switch ext {
+	case ".go":
+		return "fa-brands fa-golang"
+	case ".js":
+		return "fa-brands fa-square-js"
+	case ".ts", ".tsx":
+		return "fa-brands fa-js"
+	case ".py":
+		return "fa-brands fa-python"
+	case ".rs":
+		return "fa-brands fa-rust"
+	case ".html":
+		return "fa-brands fa-html5"
+	case ".css":
+		return "fa-brands fa-css3-alt"
+	case ".php":
+		return "fa-brands fa-php"
+	case ".java":
+		return "fa-brands fa-java"
+	case ".rb":
+		return "fa-brands fa-ruby"
+	case ".md", ".markdown":
+		return "fa-brands fa-markdown"
+	case ".docker", "Dockerfile":
+		return "fa-brands fa-docker"
+	case ".git", ".gitignore":
+		return "fa-brands fa-git-alt"
+	default:
+		return "fa-regular fa-file"
+	}
 }

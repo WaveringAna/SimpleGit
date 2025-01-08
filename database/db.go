@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	config "SimpleGit/config"
 	"SimpleGit/models"
 
 	"gorm.io/driver/sqlite"
@@ -23,11 +24,17 @@ func InitDB(dataDir string) (*gorm.DB, error) {
 	dbPath := filepath.Join(dataDir, "githost.db")
 
 	// Configure GORM to use SQLite
-	config := &gorm.Config{
+	gormConfig := &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	}
 
-	db, err := gorm.Open(sqlite.Open(dbPath), config)
+	if config.GlobalConfig.DevMode {
+		gormConfig.Logger = logger.Default.LogMode(logger.Info)
+	} else {
+		gormConfig.Logger = logger.Default.LogMode(logger.Silent)
+	}
+
+	db, err := gorm.Open(sqlite.Open(dbPath), gormConfig)
 	if err != nil {
 		return nil, err
 	}

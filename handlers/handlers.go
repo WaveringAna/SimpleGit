@@ -67,6 +67,7 @@ func NewServer(repoPath string) (*Server, error) {
 			}
 			return s
 		},
+		"getFileIcon": utils.GetFileIcon,
 	}
 
 	// Parse templates
@@ -77,6 +78,17 @@ func NewServer(repoPath string) (*Server, error) {
 	s.tmpl = tmpl
 
 	return s, nil
+}
+
+func (s *Server) addCommonData(r *http.Request, data map[string]interface{}) map[string]interface{} {
+	if data == nil {
+		data = make(map[string]interface{})
+	}
+
+	user, _ := s.getUserFromRequest(r)
+	data["User"] = user
+
+	return data
 }
 
 func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
@@ -95,9 +107,7 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		"Repos": s.Repos,
 	}
 
-	if err := s.tmpl.ExecuteTemplate(w, "index.html", data); err != nil {
-		models.HandleError(w, r, models.NewInternalError("Failed to render template").WithError(err))
-	}
+	s.tmpl.ExecuteTemplate(w, "index.html", s.addCommonData(r, data))
 }
 
 func (s *Server) handleListRepos(w http.ResponseWriter, r *http.Request) {
@@ -203,7 +213,7 @@ func (s *Server) handleViewRepo(w http.ResponseWriter, r *http.Request) {
 		"IsEmpty":  false,
 	}
 
-	if err := s.tmpl.ExecuteTemplate(w, "repo.html", data); err != nil {
+	if err := s.tmpl.ExecuteTemplate(w, "repo.html", s.addCommonData(r, data)); err != nil {
 		models.HandleError(w, r, models.NewInternalError("Failed to render template").WithError(err))
 	}
 }
@@ -374,4 +384,18 @@ func (s *Server) SetDB(db *gorm.DB) {
 
 func (s *Server) SetUserService(userService *models.UserService) {
 	s.userService = userService
+}
+
+func (s *Server) getUserFromRequest(r *http.Request) (*models.User, error) {
+	userID := r.Header.Get("User-ID")
+	if userID == "" {
+		return nil, nil
+	}
+
+	var user models.User
+	if err := s.db.First(&user, "id = ?", userID).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }

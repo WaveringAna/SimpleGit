@@ -79,6 +79,7 @@ main {
     align-items: center;
     max-width: 1200px;
     margin: 0 auto;
+    padding: 0 1rem;
 }
 
 .header-content h1 {
@@ -680,4 +681,51 @@ button:active {
     margin: 0;
     white-space: pre;
     overflow-x: auto;
+}
+
+/* File icons */
+.fa-folder {
+    color: #61AFEF;
+}
+.fa-golang { color: #00ADD8; }
+.fa-square-js { color: #F7DF1E; }
+.fa-python { color: #3776AB; }
+.fa-rust { color: #DEA584; }
+.fa-html5 { color: #E34F26; }
+.fa-css3-alt { color: #1572B6; }
+.fa-php { color: #777BB4; }
+.fa-java { color: #007396; }
+.fa-ruby { color: #CC342D; }
+.fa-markdown { color: #083FA1; }
+.fa-docker { color: #2496ED; }
+.fa-git-alt { color: #F05032; }
+.fa-file { color: #8B949E; }
+
+/* Add some spacing between icon and text */
+.files td a i {
+    margin-right: 0.5rem;
+    width: 16px;
+    text-align: center;
+}
+
+.user-nav {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.user-nav a {
+    color: #ABB2BF;
+    text-decoration: none;
+    font-size: 1.2rem;
+    transition: color 0.2s;
+}
+
+.user-nav a:hover {
+    color: #E5E9F0;
+}
+
+.user-nav i {
+    width: 1.2rem;
+    text-align: center;
 }
