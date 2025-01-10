@@ -25,6 +25,7 @@ func (s *Server) SetupRoutes() {
 	http.HandleFunc("/", s.handleIndex)
 	http.HandleFunc("/repo/", s.handleViewRepo)
 	http.HandleFunc("/file/", s.handleViewFile)
+	http.HandleFunc("/commit/", s.handleViewCommit)
 
 	//Auth Route
 	http.HandleFunc("/login", s.handleLogin)

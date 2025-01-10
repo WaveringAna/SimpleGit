@@ -89,7 +89,7 @@ git push origin main</pre>
                     {{range .Commits}}
                     <div class="commit">
                         <div class="commit-header">
-                            <span class="commit-hash">{{slice .Hash 0 7}}</span>
+                            <a href="/commit/{{$.Repo.Name}}/{{.Hash}}" class="commit-hash">{{slice .Hash 0 7}}</a>
                             <span class="commit-author">{{.Author}}</span>
                             <span class="commit-date">{{.Timestamp | formatDate}}</span>
                         </div>

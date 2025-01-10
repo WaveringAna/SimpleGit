@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{slice .Commit.Hash 0 7}} - {{.Repo.Name}} - Git Server</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/nord.min.css">
+    <script src="/static/js/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>
+                <a href="/">Git Server</a> / 
+                <a href="/repo/{{.Repo.Name}}">{{.Repo.Name}}</a> /
+                <span>commit</span> /
+                <span class="commit-hash">{{slice .Commit.Hash 0 7}}</span>
+            </h1>
+        </div>
+    </header>
+
+    <main>
+        <div class="commit-view">
+            <div class="commit-details">
+                <h2>{{.Commit.Message}}</h2>
+                <div class="commit-meta">
+                    <div class="author">
+                        <i class="fa-solid fa-user"></i>
+                        {{.Commit.Author}} &lt;{{.Commit.Email}}&gt;
+                    </div>
+                    <div class="timestamp">
+                        <i class="fa-regular fa-clock"></i>
+                        {{.Commit.Timestamp | formatDate}}
+                    </div>
+                    <div class="hash">
+                        <i class="fa-solid fa-code-commit"></i>
+                        <a href="/commit/{{.Repo.Name}}/{{.Commit.Hash}}" class="commit-hash">{{.Commit.Hash}}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html> 
