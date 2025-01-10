@@ -1,14 +1,21 @@
 # Build stage
 FROM golang:1.21.5-alpine AS builder
+
+# Install build dependencies
+RUN apk add --no-cache gcc musl-dev
+
 WORKDIR /app
 COPY . .
+
+# Enable CGO and build
+ENV CGO_ENABLED=1
 RUN go build -o simplegit
 
 # Final stage
 FROM alpine:latest
 WORKDIR /app
 
-# Install git
+# Install runtime dependencies
 RUN apk add --no-cache git
 
 # Copy binary and static assets
