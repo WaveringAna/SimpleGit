@@ -129,9 +129,11 @@ func (s *Server) handleViewCommit(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// Process file stats
+			// NOTE: go-git's diff shows changes from current -> parent
+			// but we want to show parent -> current, so we swap Addition/Deletion
 			for _, fileStat := range patch.Stats() {
-				diff.Additions += fileStat.Addition
-				diff.Deletions += fileStat.Deletion
+				diff.Additions += fileStat.Deletion // Deletion in parent means Addition in current
+				diff.Deletions += fileStat.Addition // Addition in parent means Deletion in current
 			}
 
 			// Pre-allocate patches slice
@@ -183,21 +185,23 @@ func (s *Server) handleViewCommit(w http.ResponseWriter, r *http.Request) {
 						}
 
 						// Set line numbers and type based on chunk type
+						// NOTE: go-git's chunks are from the perspective of going from current -> parent
+						// but we want to show parent -> current, so we swap the meaning of Add/Delete
 						switch chunk.Type() {
-						case 0: // Equal
+						case 0: // Equal - no change
 							oldLineNum++
 							newLineNum++
 							patchInfo.Type = "context"
 							patchInfo.OldNum = oldLineNum
 							patchInfo.NewNum = newLineNum
-						case 1: // Add
+						case 1: // Add in parent means it was deleted in current
 							newLineNum++
-							patchInfo.Type = "addition"
+							patchInfo.Type = "deletion"
 							patchInfo.OldNum = 0
 							patchInfo.NewNum = newLineNum
-						case 2: // Delete
+						case 2: // Delete in parent means it was added in current
 							oldLineNum++
-							patchInfo.Type = "deletion"
+							patchInfo.Type = "addition"
 							patchInfo.OldNum = oldLineNum
 							patchInfo.NewNum = 0
 						}

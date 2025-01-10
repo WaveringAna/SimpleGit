@@ -393,7 +393,7 @@ tr.highlighted {
 }
 
 .hljs-comment {
-    color: #636B7B;
+    color: #8B95A7;
 }
 
 .hljs-function {
@@ -987,4 +987,18 @@ button:active {
 
 .separator .line-number {
     background: #2E323A;
+}
+
+/* Make comments even more visible in diffs */
+.diff-table .line-content .hljs-comment {
+    color: #A1AABA;
+}
+
+/* Ensure comments are still visible on colored backgrounds */
+.diff-table tr.addition .line-content .hljs-comment {
+    color: #6A8C6E;
+}
+
+.diff-table tr.deletion .line-content .hljs-comment {
+    color: #A15A5F;
 }

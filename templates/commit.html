@@ -58,7 +58,7 @@
                         <tr class="{{.Type}}">
                             <td class="line-number">{{.OldNum}}</td>
                             <td class="line-number">{{.NewNum}}</td>
-                            <td class="line-content">{{.Content}}</td>
+                            <td class="line-content"><code>{{.Content}}</code></td>
                         </tr>
                         {{end}}
                     </tbody>
@@ -67,5 +67,20 @@
             {{end}}
         </div>
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('.file-diff').forEach((diff) => {
+                const filename = diff.querySelector('.filename').textContent;
+                const extension = filename.split('.').pop();
+                
+                // Add the language class to all code elements in this diff
+                diff.querySelectorAll('code').forEach((block) => {
+                    block.classList.add(extension);
+                    hljs.highlightElement(block);
+                });
+            });
+        });
+    </script>
 </body>
 </html> 
