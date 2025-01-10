@@ -974,3 +974,17 @@ button:active {
     color: #7BC3FF;
     text-decoration: underline;
 }
+
+.separator {
+    text-align: center;
+    color: #636B7B;
+    background: #2E323A;
+}
+
+.separator .line-content {
+    padding: 0.25rem 0;
+}
+
+.separator .line-number {
+    background: #2E323A;
+}

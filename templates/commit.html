@@ -38,6 +38,33 @@
                     </div>
                 </div>
             </div>
+
+            {{range .Diffs}}
+            <div class="file-diff">
+                <div class="file-header">
+                    <span class="filename">{{.Path}}</span>
+                    <div class="stats">
+                        {{if .Additions}}
+                        <span class="additions">+{{.Additions}}</span>
+                        {{end}}
+                        {{if .Deletions}}
+                        <span class="deletions">-{{.Deletions}}</span>
+                        {{end}}
+                    </div>
+                </div>
+                <table class="diff-table">
+                    <tbody>
+                        {{range .Patches}}
+                        <tr class="{{.Type}}">
+                            <td class="line-number">{{.OldNum}}</td>
+                            <td class="line-number">{{.NewNum}}</td>
+                            <td class="line-content">{{.Content}}</td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+            {{end}}
         </div>
     </main>
 </body>
