@@ -239,6 +239,11 @@ table.files a:hover {
     background: #262931;
     border: 1px solid #2E323A;
     border-radius: 6px;
+    height: fit-content;
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 200px);
+    overflow: auto;
 }
 
 .file-info {
@@ -271,12 +276,16 @@ table.files a:hover {
     height: fit-content;
     position: sticky;
     top: 1rem;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 200px);
 }
 
 .symbol-header {
     padding: 0.75rem 1rem;
     border-bottom: 1px solid #363B44;
     background: #2E323A;
+    flex: 0 0 auto;
 }
 
 .symbol-header h3 {
@@ -286,9 +295,23 @@ table.files a:hover {
 }
 
 .symbol-list {
-    max-height: calc(100vh - 200px);
     overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    position: relative;
 }
+
+.symbol-list::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(transparent, rgba(38, 41, 49, 0.9));
+    pointer-events: none;
+}
+
 
 .symbol-item {
     display: flex;
@@ -297,6 +320,8 @@ table.files a:hover {
     color: #E5E9F0;
     text-decoration: none;
     border-bottom: 1px solid #2E323A;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .symbol-item:hover {
@@ -306,21 +331,30 @@ table.files a:hover {
 .symbol-type {
     margin-right: 0.5rem;
     font-size: 1.1rem;
+    flex: 0 0 auto;
 }
 
 .symbol-name {
     font-family: monospace;
     font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
 }
 
 .code-container {
-    overflow-x: auto;
+    position: relative;
+    background: #262931;
+    min-width: fit-content; /* Match the symbol-list max-height */
+    /*overflow-x: auto;
+    overflow-y: auto;*/
 }
 
 .line-numbers-table {
     width: 100%;
     border-collapse: collapse;
-    font-family: monospace;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
     font-size: 14px;
     line-height: 1.5;
     background: #262931;
@@ -331,13 +365,18 @@ table.files a:hover {
 }
 
 .line-number {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
     padding: 0 1rem;
     min-width: 40px;
     text-align: right;
     color: #636B7B;
-    user-select: none;
     border-right: 1px solid #2E323A;
+    background: #1F2126;
 }
+
 
 .line-content {
     padding: 0 1rem;
@@ -347,6 +386,7 @@ table.files a:hover {
 .line-content code {
     background: transparent !important;
     padding: 0 !important;
+    color: #E5E9F0;
 }
 
 tr.highlighted {
@@ -356,10 +396,12 @@ tr.highlighted {
 
 /* Adjust file content width */
 .file-content {
-    overflow-x: auto;
     background: #262931;
     border: 1px solid #2E323A;
     border-radius: 6px;
+    height: fit-content;
+    position: sticky;
+    top: 1rem; /* Match the symbol-sidebar positioning */
 }
 
 /* Code syntax highlighting colors */

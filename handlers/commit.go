@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"SimpleGit/models"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -35,6 +34,7 @@ type PatchInfo struct {
 	NewNum  int    `json:"new_num"`
 }
 
+/*
 func prettyPrintDiff(diff Diff) {
 	fmt.Printf("\n=== File: %s ===\n", diff.Path)
 	if diff.IsNew {
@@ -52,8 +52,9 @@ func prettyPrintDiff(diff Diff) {
 		fmt.Printf("Content:\n%s\n", patch.Content)
 		fmt.Printf("-------------\n")
 	}
-	fmt.Println("==================\n")
+	fmt.Println("==================")
 }
+*/
 
 func (s *Server) handleViewCommit(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")

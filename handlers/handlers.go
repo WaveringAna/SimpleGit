@@ -21,6 +21,14 @@ import (
 	"gorm.io/gorm"
 )
 
+// Server represents the server configuration and dependencies.
+//
+// Parameters:
+//   - RepoPath: The path to the repository directory.
+//   - Repos: A map of repository names to repository objects.
+//   - tmpl: The template engine instance.
+//   - userService: The user service instance.
+//   - db: The database instance.
 type Server struct {
 	RepoPath    string
 	Repos       map[string]*models.Repository
@@ -29,6 +37,10 @@ type Server struct {
 	db          *gorm.DB
 }
 
+// NewServer creates a new server instance with the given repository path.
+//
+// Parameters:
+//   - repoPath: The path to the repository directory.
 func NewServer(repoPath string) (*Server, error) {
 	if err := os.MkdirAll(repoPath, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create repo directory: %w", err)
@@ -80,6 +92,15 @@ func NewServer(repoPath string) (*Server, error) {
 	return s, nil
 }
 
+// addCommonData adds common data to the given map.
+//
+// Parameters:
+//   - r: The HTTP request.
+//   - data: The map of data to add to.
+//
+// Returns:
+//
+//	The updated map of data.
 func (s *Server) addCommonData(r *http.Request, data map[string]interface{}) map[string]interface{} {
 	if data == nil {
 		data = make(map[string]interface{})
@@ -110,6 +131,11 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	s.tmpl.ExecuteTemplate(w, "index.html", s.addCommonData(r, data))
 }
 
+// handleListRepos handles the request to list all repositories.
+//
+// Parameters:
+//   - w: The HTTP response writer.
+//   - r: The HTTP request.
 func (s *Server) handleListRepos(w http.ResponseWriter, r *http.Request) {
 	repos := make([]*models.Repository, 0, len(s.Repos))
 	for _, repo := range s.Repos {
@@ -122,6 +148,11 @@ func (s *Server) handleListRepos(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// handleViewRepo handles the request to view a repository.
+//
+// Parameters:
+//   - w: The HTTP response writer.
+//   - r: The HTTP request.
 func (s *Server) handleViewRepo(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	if len(parts) < 2 {
@@ -218,6 +249,11 @@ func (s *Server) handleViewRepo(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// handleViewFile handles the request to view a file.
+//
+// Parameters:
+//   - w: The HTTP response writer.
+//   - r: The HTTP request.
 func (s *Server) handleViewFile(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	if len(parts) < 3 {
@@ -305,6 +341,7 @@ func (s *Server) handleViewFile(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ScanRepositories scans the repository directory and updates the server's repository map.
 func (s *Server) ScanRepositories() error {
 	entries, err := os.ReadDir(s.RepoPath)
 	if err != nil {
@@ -359,6 +396,7 @@ func (s *Server) ScanRepositories() error {
 	return nil
 }
 
+// InitAdminSetup checks if an admin user exists and creates a setup token if not.
 func (s *Server) InitAdminSetup() error {
 	// Check if admin exists
 	adminCount, err := s.userService.GetAdminCount()
@@ -378,14 +416,24 @@ func (s *Server) InitAdminSetup() error {
 	return nil
 }
 
+// SetDB sets the database instance for the server.
 func (s *Server) SetDB(db *gorm.DB) {
 	s.db = db
 }
 
+// SetUserService sets the user service instance for the server.
 func (s *Server) SetUserService(userService *models.UserService) {
 	s.userService = userService
 }
 
+// getUserFromRequest gets the user from the request header.
+//
+// Parameters:
+//   - r: The HTTP request.
+//
+// Returns:
+//
+//	The user object or nil if not found.
 func (s *Server) getUserFromRequest(r *http.Request) (*models.User, error) {
 	userID := r.Header.Get("User-ID")
 	if userID == "" {

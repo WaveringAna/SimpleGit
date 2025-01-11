@@ -40,7 +40,7 @@ func ParseSymbols(content []byte) []Symbol {
 		icon  string
 	}{
 		// Functions - catches async, static, public, private, etc.
-		{`^[\s]*(?:async\s+)?(?:static\s+)?(?:public\s+)?(?:private\s+)?(?:protected\s+)?(?:function|func)\s+(\w+)`, "function", "ƒ"},
+		{`^[\s]*(?:async\s+)?(?:static\s+)?(?:public\s+)?(?:private\s+)?(?:protected\s+)?(?:func|function)\s+(?:\([^)]*\)\s+)?(\w+)`, "function", "ƒ"},
 
 		// Arrow functions with explicit name
 		{`^[\s]*(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\(.*?\)\s*=>`, "function", "ƒ"},
@@ -56,6 +56,7 @@ func ParseSymbols(content []byte) []Symbol {
 
 		// Variables
 		{`^[\s]*(?:export\s+)?(?:var|let|private|public|protected)\s+(\w+)`, "variable", "○"},
+		{`^[\s]*(\w+)\s*:=`, "variable", "○"},
 
 		// Methods
 		{`^[\s]*(?:async\s+)?(?:static\s+)?(?:public\s+)?(?:private\s+)?(?:protected\s+)?(?:def|method)\s+(\w+)`, "method", "⌘"},

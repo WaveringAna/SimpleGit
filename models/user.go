@@ -35,13 +35,11 @@ func NewUserService(db *gorm.DB, jwtKey []byte) *UserService {
 }
 
 func (s *UserService) CreateUser(email, password string, isAdmin bool) (*User, error) {
-	// Hash the password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 
-	// Create new user with UUID
 	user := &User{
 		ID:        uuid.New().String(),
 		Email:     email,
@@ -51,7 +49,6 @@ func (s *UserService) CreateUser(email, password string, isAdmin bool) (*User, e
 		UpdatedAt: time.Now(),
 	}
 
-	// Save to database
 	if err := s.db.Create(user).Error; err != nil {
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
@@ -69,7 +66,6 @@ func (s *UserService) AuthenticateUser(email, password string) (*User, string, e
 		return nil, "", err
 	}
 
-	// Generate JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": user.ID,
 		"email":   user.Email,

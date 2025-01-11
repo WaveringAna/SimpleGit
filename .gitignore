@@ -1,6 +1,7 @@
 repositories/
 data/
 *.db
+admin_setup_token.txt
 
 # Binaries for programs and plugins
 *.exe

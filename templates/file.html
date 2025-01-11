@@ -132,6 +132,23 @@
                     }
                 });
             });
+
+            const symbolList = document.querySelector('.symbol-list');
+    
+            // Add a class when scrollable
+            function updateScrollIndicator() {
+                if (symbolList.scrollHeight > symbolList.clientHeight) {
+                    symbolList.classList.add('is-scrollable');
+                } else {
+                    symbolList.classList.remove('is-scrollable');
+                }
+            }
+
+            // Update on content changes
+            updateScrollIndicator();
+    
+            // Optional: Update on window resize
+            window.addEventListener('resize', updateScrollIndicator);
         });
     </script>
 </body>
