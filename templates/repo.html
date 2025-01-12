@@ -5,7 +5,6 @@
     <title>{{.Repo.Name}} - Git Server</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
     <header>
@@ -96,6 +95,10 @@ git push origin main</pre>
                         <div class="commit-message">{{firstLine .Message}}</div>
                     </div>
                     {{end}}
+                </div>
+                <div class="clone-instructions">
+                    <h2>Clone Repository</h2>
+                    <pre class="command-block">git clone {{.Repo.CloneURL}}</pre>
                 </div>
             </div>
         </div>
