@@ -219,13 +219,6 @@ func (s *Server) handleViewCommit(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	/*
-		fmt.Printf("Number of diffs: %d\n", len(diffs))
-		for _, d := range diffs {
-			fmt.Printf("File: %s (Patches: %d)\n", d.Path, len(d.Patches))
-		}
-	*/
-
 	data := map[string]interface{}{
 		"Repo": repo,
 		"Commit": CommitInfo{
