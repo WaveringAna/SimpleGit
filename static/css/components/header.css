@@ -1,0 +1,84 @@
+/* Header styles */
+header {
+    background: #262931;
+    color: #E5E9F0;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid #2E323A;
+}
+
+header h1 {
+    margin: 0;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.header-content h1 {
+    font-size: 1.5rem;
+}
+
+.header-content h1 a {
+    color: #61AFEF;
+    text-decoration: none;
+}
+
+.header-content h1 a:hover {
+    color: #7BC3FF;
+    text-decoration: underline;
+}
+
+/* User navigation */
+.user-nav {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.user-nav a {
+    color: #ABB2BF;
+    text-decoration: none;
+    font-size: 1.2rem;
+    transition: color 0.2s;
+}
+
+.user-nav a:hover {
+    color: #E5E9F0;
+}
+
+.user-nav i {
+    width: 1.2rem;
+    text-align: center;
+}
+
+/* Branch selector */
+.branch-selector select {
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #2E323A;
+    background: #262931;
+    color: #E5E9F0;
+    font-size: 0.9rem;
+    cursor: pointer;
+    outline: none;
+}
+
+.branch-selector select:hover {
+    background: #2E323A;
+    border-color: #363B44;
+}
+
+.branch-selector select:focus {
+    border-color: #61AFEF;
+    box-shadow: 0 0 0 2px rgba(97, 175, 239, 0.2);
+}
+
+.branch-selector select option {
+    background: #262931;
+    color: #E5E9F0;
+} 

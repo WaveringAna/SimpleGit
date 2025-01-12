@@ -1,0 +1,206 @@
+/* Commit history */
+.commit-history {
+    background: #262931;
+    border: 1px solid #2E323A;
+    border-radius: 6px;
+}
+
+.commit-history h2 {
+    margin: 0;
+    padding: 1rem;
+    border-bottom: 1px solid #2E323A;
+    font-size: 1.2rem;
+    background: #2E323A;
+}
+
+.commits {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.commit {
+    padding: 1rem;
+    border-bottom: 1px solid #2E323A;
+}
+
+.commit:last-child {
+    border-bottom: none;
+}
+
+.commit-header {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: #586069;
+    margin-bottom: 0.5rem;
+}
+
+.commit-hash {
+    font-family: monospace;
+    color: #61AFEF;
+    text-decoration: none;
+}
+
+.commit-hash:hover {
+    color: #7BC3FF;
+    text-decoration: underline;
+}
+
+.commit-message {
+    color: #939ba6;
+    white-space: pre-line;
+}
+
+/* Commit view */
+.commit-view {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.commit-details {
+    background: #262931;
+    border: 1px solid #2E323A;
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.commit-details h2 {
+    margin: 0 0 1rem 0;
+    color: #E5E9F0;
+    font-size: 1.25rem;
+    white-space: pre-line;
+}
+
+.commit-meta {
+    display: flex;
+    gap: 2rem;
+    color: #ABB2BF;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.commit-meta i {
+    margin-right: 0.5rem;
+    color: #636B7B;
+}
+
+/* Diff view */
+.file-diff {
+    background: #262931;
+    border: 1px solid #2E323A;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+
+.file-header {
+    padding: 8px 16px;
+    background: #2E323A;
+    border: 1px solid #363B44;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.filename {
+    color: #E5E9F0;
+    font-family: ui-monospace, monospace;
+    font-size: 14px;
+}
+
+.stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+}
+
+.additions {
+    color: #98C379;
+}
+
+.deletions {
+    color: #E06C75;
+}
+
+.diff-table {
+    width: 100%;
+    border-spacing: 0;
+    border-collapse: separate;
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+    background: #1C1E26;
+}
+
+.diff-table tr {
+    height: 20px;
+}
+
+.diff-table td {
+    padding: 0 8px;
+    line-height: 20px;
+    vertical-align: top;
+}
+
+.diff-table .line-number {
+    width: 50px;
+    text-align: right;
+    color: #636B7B;
+    background: #1C1E26;
+    border-right: 1px solid #2E323A;
+    user-select: none;
+}
+
+.diff-table .line-content {
+    white-space: pre;
+    padding-left: 15px;
+}
+
+.diff-table .addition {
+    background: rgba(87, 171, 90, 0.15);
+}
+
+.diff-table .addition .line-content {
+    background: rgba(87, 171, 90, 0.25);
+}
+
+.diff-table .deletion {
+    background: rgba(229, 83, 75, 0.15);
+}
+
+.diff-table .deletion .line-content {
+    background: rgba(229, 83, 75, 0.25);
+}
+
+.diff-table tr.context .line-content {
+    color: #ABB2BF;
+}
+
+.separator {
+    text-align: center;
+    color: #636B7B;
+    background: #2E323A;
+}
+
+.separator .line-content {
+    padding: 0.25rem 0;
+}
+
+.separator .line-number {
+    background: #2E323A;
+}
+
+/* Make comments even more visible in diffs */
+.diff-table .line-content .hljs-comment {
+    color: #A1AABA;
+}
+
+.diff-table tr.addition .line-content .hljs-comment {
+    color: #6A8C6E;
+}
+
+.diff-table tr.deletion .line-content .hljs-comment {
+    color: #A15A5F;
+} 

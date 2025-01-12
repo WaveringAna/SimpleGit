@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -339,6 +340,64 @@ func (s *Server) handleViewFile(w http.ResponseWriter, r *http.Request) {
 	if err := s.tmpl.ExecuteTemplate(w, "file.html", data); err != nil {
 		models.HandleError(w, r, models.NewInternalError("Failed to render template").WithError(err))
 	}
+}
+
+// handleRawFile handles the request to view a raw file.
+//
+// Parameters:
+//   - w: The HTTP response writer.
+//   - r: The HTTP request.
+func (s *Server) handleRawFile(w http.ResponseWriter, r *http.Request) {
+	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	if len(parts) < 3 {
+		models.HandleError(w, r, models.NewBadRequestError("Invalid file path"))
+		return
+	}
+
+	repoName := parts[1]
+	repo, ok := s.Repos[repoName]
+	if !ok {
+		models.HandleError(w, r, models.NewNotFoundError("Repository not found").WithDetail(fmt.Sprintf("Repository: %s", repoName)))
+		return
+	}
+
+	path := strings.Join(parts[2:], "/")
+	branch := r.URL.Query().Get("branch")
+	if branch == "" {
+		branches, err := repo.GetBranches()
+		if err != nil {
+			models.HandleError(w, r, models.NewGitError("Failed to get branches", err))
+			return
+		}
+		if len(branches) == 0 {
+			models.HandleError(w, r, models.NewGitError("No branches found", nil))
+			return
+		}
+		branch = branches[0]
+	}
+
+	content, err := repo.GetFile(path, branch)
+	if err != nil {
+		if err == plumbing.ErrObjectNotFound {
+			models.HandleError(w, r, models.NewNotFoundError("File not found"))
+		} else {
+			models.HandleError(w, r, models.NewGitError("Failed to read file", err))
+		}
+		return
+	}
+
+	ext := filepath.Ext(path)
+	contentType := mime.TypeByExtension(ext)
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+	w.Header().Set("Content-Type", contentType)
+
+	if utils.IsBinaryFile(content) {
+		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filepath.Base(path)))
+	}
+
+	w.Write(content)
 }
 
 // ScanRepositories scans the repository directory and updates the server's repository map.

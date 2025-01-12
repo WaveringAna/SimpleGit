@@ -1,0 +1,38 @@
+<div class="file-browser-sidebar">
+    <div class="path-nav">
+        <a href="/repo/{{.Repo.Name}}">{{.Repo.Name}}</a>
+        {{$repo := .Repo.Name}}
+        {{$parts := split .Path "/"}}
+        {{$path := ""}}
+        {{range $parts}}
+            {{$path = printf "%s/%s" $path .}}
+            / <a href="/repo/{{$repo}}{{$path}}">{{.}}</a>
+        {{end}}
+    </div>
+
+    <div class="files-list">
+        {{if .Path}}
+        <div class="file-item">
+            <a href="/repo/{{.Repo.Name}}/{{dir .Path}}" class="file-link">
+                <i class="fa-solid fa-level-up-alt fa-rotate-270"></i>
+                <span>..</span>
+            </a>
+        </div>
+        {{end}}
+        {{range .Entries}}
+        <div class="file-item">
+            {{if eq .Type "tree"}}
+            <a href="/repo/{{$.Repo.Name}}/{{.Path}}" class="file-link">
+                <i class="fa-regular fa-folder"></i>
+                <span>{{.Name}}/</span>
+            </a>
+            {{else}}
+            <a href="/file/{{$.Repo.Name}}/{{.Path}}" class="file-link">
+                <i class="{{getFileIcon .Name}}"></i>
+                <span>{{.Name}}</span>
+            </a>
+            {{end}}
+        </div>
+        {{end}}
+    </div>
+</div> 

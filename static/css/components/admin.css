@@ -1,0 +1,164 @@
+/* Admin navigation */
+.admin-nav {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.admin-nav a {
+    color: #ABB2BF;
+    text-decoration: none;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: color 0.2s ease;
+}
+
+.admin-nav a:hover {
+    color: #E5E9F0;
+}
+
+.admin-nav a.active {
+    color: #61AFEF;
+}
+
+/* Admin dashboard */
+.admin-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.stat-card {
+    background: #262931;
+    border: 1px solid #2E323A;
+    border-radius: 6px;
+    padding: 1.5rem;
+}
+
+.stat-card h3 {
+    margin: 0;
+    color: #ABB2BF;
+    font-size: 1rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #61AFEF;
+    margin-top: 0.5rem;
+}
+
+/* Admin sections */
+.admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+}
+
+.admin-section {
+    background: #262931;
+    border: 1px solid #2E323A;
+    border-radius: 6px;
+    padding: 1.5rem;
+}
+
+.admin-section h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+    color: #E5E9F0;
+}
+
+.admin-container {
+    background: #262931;
+    border: 1px solid #2E323A;
+    border-radius: 6px;
+    padding: 1.5rem;
+}
+
+/* Action bar */
+.action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.action-bar h2 {
+    margin: 0;
+}
+
+.create-btn {
+    background: #98C379;
+}
+
+.create-btn:hover {
+    background: #A6CF87;
+}
+
+/* Admin lists */
+.admin-list table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-list th {
+    text-align: left;
+    padding: 1rem;
+    border-bottom: 2px solid #2E323A;
+    color: #ABB2BF;
+    font-weight: 600;
+}
+
+.admin-list td {
+    padding: 1rem;
+    border-bottom: 1px solid #2E323A;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.edit-btn {
+    background: #61AFEF;
+    padding: 0.25rem 0.5rem;
+}
+
+.delete-btn {
+    background: #E06C75;
+    padding: 0.25rem 0.5rem;
+}
+
+.delete-btn:hover {
+    background: #E55561;
+}
+
+/* Compact items */
+.compact {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.compact h3 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    border-bottom: 1px solid #2E323A;
+}
+
+.user-role {
+    color: #ABB2BF;
+    font-size: 0.9rem;
+} 

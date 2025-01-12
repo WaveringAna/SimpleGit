@@ -56,7 +56,7 @@ func ParseSymbols(content []byte) []Symbol {
 
 		// Variables
 		{`^[\s]*(?:export\s+)?(?:var|let|private|public|protected)\s+(\w+)`, "variable", "○"},
-		{`^[\s]*(\w+)\s*:=`, "variable", "○"},
+		{`^[\s]*(\w+(?:\s*,\s*\w+)*)\s*:=`, "variable", "○"},
 
 		// Methods
 		{`^[\s]*(?:async\s+)?(?:static\s+)?(?:public\s+)?(?:private\s+)?(?:protected\s+)?(?:def|method)\s+(\w+)`, "method", "⌘"},
@@ -81,12 +81,25 @@ func ParseSymbols(content []byte) []Symbol {
 		for _, pattern := range patterns {
 			re := regexp.MustCompile(pattern.regex)
 			if matches := re.FindStringSubmatch(line); matches != nil {
-				symbols = append(symbols, Symbol{
-					Name: matches[1],
-					Type: pattern.typ,
-					Icon: pattern.icon,
-					Line: lineNum + 1,
-				})
+				if pattern.typ == "variable" && strings.Contains(matches[1], ",") {
+					// Split multiple variable declarations
+					vars := strings.Split(matches[1], ",")
+					for _, v := range vars {
+						symbols = append(symbols, Symbol{
+							Name: strings.TrimSpace(v),
+							Type: pattern.typ,
+							Icon: pattern.icon,
+							Line: lineNum + 1,
+						})
+					}
+				} else {
+					symbols = append(symbols, Symbol{
+						Name: matches[1],
+						Type: pattern.typ,
+						Icon: pattern.icon,
+						Line: lineNum + 1,
+					})
+				}
 			}
 		}
 	}

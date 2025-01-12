@@ -34,7 +34,17 @@
         <div class="file-view">
             <div class="file-content">
                 <div class="file-info">
-                    <span>{{formatSize .Size}} bytes</span>
+                    <div class="file-stats">
+                        <span>{{formatSize .Size}} bytes</span>
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn" onclick="copyCode()" title="Copy code">
+                            <i class="fa-regular fa-copy"></i> Copy
+                        </button>
+                        <a href="/raw/{{.Repo.Name}}/{{.Path}}?branch={{.Branch}}" class="btn" title="View raw file">
+                            <i class="fa-solid fa-file-code"></i> Raw
+                        </a>
+                    </div>
                 </div>
                 <div class="code-container">
                     <table class="line-numbers-table">
@@ -150,6 +160,31 @@
             // Optional: Update on window resize
             window.addEventListener('resize', updateScrollIndicator);
         });
+
+        function copyCode() {
+            // Get all code content
+            const codeLines = document.querySelectorAll('.line-content');
+            let codeText = '';
+            codeLines.forEach(line => {
+                codeText += line.textContent + '\n';
+            });
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(codeText).then(() => {
+                // Visual feedback
+                const copyBtn = document.querySelector('.fa-copy').parentElement;
+                copyBtn.classList.add('copied');
+                copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+                
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    copyBtn.classList.remove('copied');
+                    copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> Copy';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
+        }
     </script>
 </body>
 </html>
