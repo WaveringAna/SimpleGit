@@ -6,6 +6,7 @@ import (
 	config "SimpleGit/config"
 	"errors"
 	"fmt"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -299,4 +300,23 @@ func (r *Repository) CloneURL() string {
 	return fmt.Sprintf("http://%s/repo/%s.git",
 		config.GlobalConfig.Domain,
 		r.Name)
+}
+
+// EnsureBare is a function that ensures that the repository is bare
+// TODO: Implement a way to do this without using exec.Command
+func (r *Repository) EnsureBare() error {
+	// Check if repository is bare
+	cmd := exec.Command("git", "config", "--bool", "core.bare")
+	cmd.Dir = r.Path
+	output, err := cmd.Output()
+
+	if err != nil || strings.TrimSpace(string(output)) != "true" {
+		// Convert to bare repository
+		cmd = exec.Command("git", "config", "--bool", "core.bare", "true")
+		cmd.Dir = r.Path
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("failed to set repository as bare: %w", err)
+		}
+	}
+	return nil
 }

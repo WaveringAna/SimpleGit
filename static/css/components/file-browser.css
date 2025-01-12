@@ -31,7 +31,11 @@ table.files th,
 table.files td {
     padding: 0.75rem 1rem;
     border-bottom: 1px solid #2E323A;
-}
+    max-width: 60ch;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+} 
 
 table.files th {
     text-align: left;
@@ -252,4 +256,4 @@ table.files a:hover {
 tr.highlighted {
     background-color: #363B44 !important;
     transition: background-color 0.5s ease;
-} 
+}

@@ -23,7 +23,7 @@ func (s *Server) SetupRoutes() {
 
 	// HTML routes
 	http.HandleFunc("/", s.handleIndex)
-	http.HandleFunc("/repo/", s.handleViewRepo)
+	http.HandleFunc("/repo/", s.handleRepo)
 	http.HandleFunc("/file/", s.handleViewFile)
 	http.HandleFunc("/commit/", s.handleViewCommit)
 	http.HandleFunc("/raw/", s.handleRawFile)

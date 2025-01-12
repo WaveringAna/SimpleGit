@@ -149,12 +149,12 @@ func (s *Server) handleListRepos(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// handleViewRepo handles the request to view a repository.
+// handleRepoView handles the request to view a repository.
 //
 // Parameters:
 //   - w: The HTTP response writer.
 //   - r: The HTTP request.
-func (s *Server) handleViewRepo(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleRepoView(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	if len(parts) < 2 {
 		models.HandleError(w, r, models.NewBadRequestError("Invalid repository path"))
@@ -453,6 +453,49 @@ func (s *Server) ScanRepositories() error {
 	// Update the server's repository map
 	s.Repos = repos
 	return nil
+}
+
+func (s *Server) handleRepo(w http.ResponseWriter, r *http.Request) {
+	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	if len(parts) < 2 {
+		models.HandleError(w, r, models.NewBadRequestError("Invalid repository path"))
+		return
+	}
+
+	repoName := strings.TrimSuffix(parts[1], ".git")
+	repo, ok := s.Repos[repoName]
+	if !ok {
+		models.HandleError(w, r, models.NewNotFoundError("Repository not found").WithDetail(fmt.Sprintf("Repository: %s", repoName)))
+		return
+	}
+
+	if strings.HasSuffix(r.URL.Path, "/info/refs") ||
+		strings.HasSuffix(r.URL.Path, "/git-upload-pack") ||
+		strings.HasSuffix(r.URL.Path, "/git-receive-pack") {
+		s.handleGitProtocol(w, r, repo)
+		return
+	}
+
+	s.handleRepoView(w, r)
+}
+
+func (s *Server) handleGitProtocol(w http.ResponseWriter, r *http.Request, repo *models.Repository) {
+	// Ensure repository is in bare format
+	if err := repo.EnsureBare(); err != nil {
+		models.HandleError(w, r, models.NewGitError("Failed to ensure bare repository", err))
+		return
+	}
+
+	switch {
+	case strings.HasSuffix(r.URL.Path, "/info/refs"):
+		s.handleInfoRefs(w, r, repo)
+	case strings.HasSuffix(r.URL.Path, "/git-upload-pack"):
+		s.handleUploadPack(w, r, repo)
+	case strings.HasSuffix(r.URL.Path, "/git-receive-pack"):
+		s.handleReceivePack(w, r, repo)
+	default:
+		http.NotFound(w, r)
+	}
 }
 
 // InitAdminSetup checks if an admin user exists and creates a setup token if not.
