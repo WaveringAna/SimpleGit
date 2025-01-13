@@ -24,12 +24,12 @@ COPY static/ static/
 COPY templates/ templates/
 COPY config.json .
 
-# Create repositories directory
-RUN mkdir -p repositories
+RUN mkdir -p repositories && \
+    mkdir -p data && \
+    adduser -D -h /app gituser && \
+    chown -R gituser:gituser /app/repositories && \
+    chown -R gituser:gituser /app/data
 
-# Run as non-root user
-RUN adduser -D -h /app gituser && \
-    chown -R gituser:gituser /app
 USER gituser
 
 EXPOSE 3000
