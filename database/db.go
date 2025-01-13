@@ -40,7 +40,7 @@ func InitDB(dataDir string) (*gorm.DB, error) {
 	}
 
 	// Auto migrate the schemas
-	if err := db.AutoMigrate(&models.User{}); err != nil {
+	if err := db.AutoMigrate(&models.User{}, &models.SSHKey{}); err != nil {
 		return nil, err
 	}
 

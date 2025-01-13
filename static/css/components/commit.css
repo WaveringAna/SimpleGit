@@ -1,26 +1,26 @@
 /* Commit history */
 .commit-history {
     background: #262931;
-    border: 1px solid #2E323A;
+    border: 1px solid #2e323a;
     border-radius: 6px;
 }
 
 .commit-history h2 {
     margin: 0;
     padding: 1rem;
-    border-bottom: 1px solid #2E323A;
+    border-bottom: 1px solid #2e323a;
     font-size: 1.2rem;
-    background: #2E323A;
+    background: #2e323a;
 }
 
 .commits {
-    max-height: 600px;
+    max-height: 70vh;
     overflow-y: auto;
 }
 
 .commit {
     padding: 1rem;
-    border-bottom: 1px solid #2E323A;
+    border-bottom: 1px solid #2e323a;
 }
 
 .commit:last-child {
@@ -37,12 +37,12 @@
 
 .commit-hash {
     font-family: monospace;
-    color: #61AFEF;
+    color: #61afef;
     text-decoration: none;
 }
 
 .commit-hash:hover {
-    color: #7BC3FF;
+    color: #7bc3ff;
     text-decoration: underline;
 }
 
@@ -53,14 +53,14 @@
 
 /* Commit view */
 .commit-view {
-    max-width: 1200px;
+    max-width: 95vw;
     margin: 0 auto;
     padding: 2rem;
 }
 
 .commit-details {
     background: #262931;
-    border: 1px solid #2E323A;
+    border: 1px solid #2e323a;
     border-radius: 6px;
     padding: 1.5rem;
     margin-bottom: 2rem;
@@ -68,7 +68,7 @@
 
 .commit-details h2 {
     margin: 0 0 1rem 0;
-    color: #E5E9F0;
+    color: #e5e9f0;
     font-size: 1.25rem;
     white-space: pre-line;
 }
@@ -76,28 +76,28 @@
 .commit-meta {
     display: flex;
     gap: 2rem;
-    color: #ABB2BF;
+    color: #abb2bf;
     font-size: 0.9rem;
     margin-bottom: 1rem;
 }
 
 .commit-meta i {
     margin-right: 0.5rem;
-    color: #636B7B;
+    color: #636b7b;
 }
 
 /* Diff view */
 .file-diff {
     background: #262931;
-    border: 1px solid #2E323A;
+    border: 1px solid #2e323a;
     border-radius: 6px;
     margin-bottom: 1rem;
 }
 
 .file-header {
     padding: 8px 16px;
-    background: #2E323A;
-    border: 1px solid #363B44;
+    background: #2e323a;
+    border: 1px solid #363b44;
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
     display: flex;
@@ -106,7 +106,7 @@
 }
 
 .filename {
-    color: #E5E9F0;
+    color: #e5e9f0;
     font-family: ui-monospace, monospace;
     font-size: 14px;
 }
@@ -118,11 +118,11 @@
 }
 
 .additions {
-    color: #98C379;
+    color: #98c379;
 }
 
 .deletions {
-    color: #E06C75;
+    color: #e06c75;
 }
 
 .diff-table {
@@ -130,26 +130,26 @@
     border-spacing: 0;
     border-collapse: separate;
     font-family: ui-monospace, monospace;
-    font-size: 12px;
-    background: #1C1E26;
+    font-size: 0.75rem;
+    background: #1c1e26;
 }
 
 .diff-table tr {
-    height: 20px;
+    height: 1.25rem;
 }
 
 .diff-table td {
-    padding: 0 8px;
-    line-height: 20px;
+    padding: 0 0.5rem;
+    line-height: 1.25rem;
     vertical-align: top;
 }
 
 .diff-table .line-number {
-    width: 50px;
+    width: 3.125rem;
     text-align: right;
-    color: #636B7B;
-    background: #1C1E26;
-    border-right: 1px solid #2E323A;
+    color: #636b7b;
+    background: #1c1e26;
+    border-right: 1px solid #2e323a;
     user-select: none;
 }
 
@@ -175,13 +175,13 @@
 }
 
 .diff-table tr.context .line-content {
-    color: #ABB2BF;
+    color: #abb2bf;
 }
 
 .separator {
     text-align: center;
-    color: #636B7B;
-    background: #2E323A;
+    color: #636b7b;
+    background: #2e323a;
 }
 
 .separator .line-content {
@@ -189,18 +189,18 @@
 }
 
 .separator .line-number {
-    background: #2E323A;
+    background: #2e323a;
 }
 
 /* Make comments even more visible in diffs */
 .diff-table .line-content .hljs-comment {
-    color: #A1AABA;
+    color: #a1aaba;
 }
 
 .diff-table tr.addition .line-content .hljs-comment {
-    color: #6A8C6E;
+    color: #6a8c6e;
 }
 
 .diff-table tr.deletion .line-content .hljs-comment {
-    color: #A15A5F;
-} 
+    color: #a15a5f;
+}

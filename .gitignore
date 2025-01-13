@@ -2,6 +2,7 @@ repositories/
 data/
 *.db
 admin_setup_token.txt
+ssh/host_key
 
 # Binaries for programs and plugins
 *.exe

@@ -498,6 +498,20 @@ func (s *Server) handleGitProtocol(w http.ResponseWriter, r *http.Request, repo 
 	}
 }
 
+func (s *Server) handleProfile(w http.ResponseWriter, r *http.Request) {
+	user, err := s.getUserFromRequest(r)
+	if err != nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	data := map[string]interface{}{
+		"User": user,
+	}
+
+	s.tmpl.ExecuteTemplate(w, "profile.html", data)
+}
+
 // InitAdminSetup checks if an admin user exists and creates a setup token if not.
 func (s *Server) InitAdminSetup() error {
 	// Check if admin exists

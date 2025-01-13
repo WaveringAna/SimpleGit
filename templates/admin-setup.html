@@ -17,20 +17,26 @@
         <div class="error-container">
             <h2>Initial Admin Setup</h2>
             <p>Please set up the administrator account using the setup token provided in the server console.</p>
-            
+
             {{if .Error}}
             <div class="error-message">
                 {{.Error}}
             </div>
             {{end}}
-            
+
             <form method="POST" action="/setup-admin">
                 <div class="form-group">
                     <label for="setup_token">Setup Token:</label>
                     <input type="text" id="setup_token" name="setup_token" required>
                 </div>
                 <div class="form-group">
-                    <label for="email">Admin Email:</label>
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required
+                           pattern="[a-zA-Z0-9_-]{3,39}"
+                           title="Username must be 3-39 characters long and contain only letters, numbers, hyphens, and underscores">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
                     <input type="email" id="email" name="email" required>
                 </div>
                 <div class="form-group">

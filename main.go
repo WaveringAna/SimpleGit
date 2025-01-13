@@ -7,9 +7,12 @@ import (
 	"SimpleGit/database"
 	"SimpleGit/handlers"
 	"SimpleGit/models"
+	"SimpleGit/ssh"
 	"fmt"
 	"log"
 	"net/http"
+	"path/filepath"
+	"sync"
 )
 
 func main() {
@@ -43,9 +46,46 @@ func main() {
 
 	server.SetupRoutes()
 
-	addr := fmt.Sprintf(":%d", config.GlobalConfig.Port)
-	log.Printf("Server starting on %s (dev mode: %v)", addr, config.GlobalConfig.DevMode)
-	if err := http.ListenAndServe(addr, nil); err != nil {
-		log.Fatal(err)
+	// Create SSH server
+	repoPath := filepath.Join(".", "repositories")
+	absRepoPath, err := filepath.Abs(repoPath)
+	if err != nil {
+		log.Fatal("Failed to get absolute repository path:", err)
 	}
+	log.Printf("Using repository path: %s", absRepoPath)
+
+	sshServer, err := ssh.NewServer(
+		absRepoPath, // Use absolute path
+		userService,
+	)
+	if err != nil {
+		log.Fatal("Failed to create SSH server:", err)
+	}
+
+	// Use WaitGroup to keep the main function from exiting
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	// Start HTTP server in a goroutine
+	go func() {
+		defer wg.Done()
+		addr := fmt.Sprintf(":%d", config.GlobalConfig.Port)
+		log.Printf("HTTP server starting on %s (dev mode: %v)", addr, config.GlobalConfig.DevMode)
+		if err := http.ListenAndServe(addr, nil); err != nil {
+			log.Fatal("HTTP server error:", err)
+		}
+	}()
+
+	// Start SSH server in a goroutine
+	go func() {
+		defer wg.Done()
+		addr := fmt.Sprintf(":%d", config.GlobalConfig.SSHPort)
+		log.Printf("SSH server starting on %s", addr)
+		if err := sshServer.ListenAndServe(addr); err != nil {
+			log.Fatal("SSH server error:", err)
+		}
+	}()
+
+	// Wait for both servers
+	wg.Wait()
 }

@@ -47,10 +47,11 @@ func (s *Server) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 
 	// Handle POST request
 	email := r.FormValue("email")
+	username := r.FormValue("username")
 	password := r.FormValue("password")
 	isAdmin := r.FormValue("is_admin") == "on"
 
-	_, err := s.userService.CreateUser(email, password, isAdmin)
+	_, err := s.userService.CreateUser(email, password, username, isAdmin)
 	if err != nil {
 		data := map[string]interface{}{
 			"Error": "Failed to create user: " + err.Error(),

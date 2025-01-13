@@ -31,9 +31,13 @@ func (s *Server) SetupRoutes() {
 	//Auth Route
 	http.HandleFunc("/login", s.handleLogin)
 	http.HandleFunc("/logout", s.handleLogout)
+	http.HandleFunc("/profile", s.requireAuth(s.handleProfile))
 
 	// API routes
 	http.HandleFunc("/api/repos", s.requireAuth(s.handleListRepos))
+	http.HandleFunc("/api/ssh-keys", s.requireAuth(s.handleListSSHKeys))
+	http.HandleFunc("/api/ssh-keys/add", s.requireAuth(s.handleAddSSHKey))
+	http.HandleFunc("/api/ssh-keys/{id}", s.requireAuth(s.handleDeleteSSHKey))
 
 	// Admin routes
 	http.HandleFunc("/setup-admin", s.handleAdminSetup)

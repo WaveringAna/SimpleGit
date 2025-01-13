@@ -92,24 +92,17 @@ func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleAdminSetup(w http.ResponseWriter, r *http.Request) {
-	// Check if admin already exists
-	adminCount, err := s.userService.GetAdminCount()
-	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	if adminCount > 0 {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
 	if r.Method == "GET" {
 		s.tmpl.ExecuteTemplate(w, "admin-setup.html", nil)
 		return
 	}
 
 	setupToken := r.FormValue("setup_token")
+	username := r.FormValue("username") // Add username field
+	email := r.FormValue("email")
+	password := r.FormValue("password")
+
+	// Validate setup token
 	storedToken, err := os.ReadFile("admin_setup_token.txt")
 	if err != nil || setupToken != string(storedToken) {
 		data := map[string]interface{}{
@@ -120,13 +113,11 @@ func (s *Server) handleAdminSetup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	email := r.FormValue("email")
-	password := r.FormValue("password")
-
-	_, err = s.userService.CreateUser(email, password, true)
+	// Create admin user with username
+	_, err = s.userService.CreateUser(username, email, password, true)
 	if err != nil {
 		data := map[string]interface{}{
-			"Error": "Failed to create admin user",
+			"Error": "Failed to create admin user: " + err.Error(),
 		}
 		w.WriteHeader(http.StatusInternalServerError)
 		s.tmpl.ExecuteTemplate(w, "admin-setup.html", data)

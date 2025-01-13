@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile - Git Server</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1><a href="/">Git Server</a> / Profile</h1>
+            <nav class="user-nav">
+                {{if .User.IsAdmin}}
+                <a href="/admin" title="Admin Dashboard"><i class="fa-solid fa-gauge-high"></i></a>
+                {{end}}
+                <a href="/logout" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="profile-container">
+            <div class="ssh-keys-section">
+                <div class="section-header">
+                    <h2>SSH Keys</h2>
+                    <button onclick="showAddKeyModal()" class="btn-primary">
+                        <i class="fa-solid fa-plus"></i> Add SSH Key
+                    </button>
+                </div>
+
+                <div id="ssh-keys-list">
+                    <!-- Keys will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Add SSH Key Modal -->
+        <div id="add-key-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>Add SSH Key</h3>
+                <form id="add-key-form">
+                    <div class="form-group">
+                        <label for="key-name">Name</label>
+                        <input type="text" id="key-name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="public-key">Public Key</label>
+                        <textarea id="public-key" name="public_key" required></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" onclick="hideAddKeyModal()" class="btn-secondary">Cancel</button>
+                        <button type="submit" class="btn-primary">Add Key</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Load SSH keys on page load
+        document.addEventListener('DOMContentLoaded', loadSSHKeys);
+
+        function loadSSHKeys() {
+            fetch('/api/ssh-keys')
+                .then(response => response.json())
+                .then(keys => {
+                    const keysList = document.getElementById('ssh-keys-list');
+                    keysList.innerHTML = keys.map(key => `
+                        <div class="ssh-key-item">
+                            <div class="key-info">
+                                <h3>${key.name}</h3>
+                                <div class="key-meta">
+                                    <span class="fingerprint">${key.fingerprint}</span>
+                                    <span class="added-on">Added on ${new Date(key.created_at).toLocaleDateString()}</span>
+                                </div>
+                            </div>
+                            <button onclick="deleteKey('${key.id}')" class="btn-danger">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    `).join('');
+                });
+        }
+
+        function showAddKeyModal() {
+            document.getElementById('add-key-modal').style.display = 'block';
+        }
+
+        function hideAddKeyModal() {
+            document.getElementById('add-key-modal').style.display = 'none';
+            document.getElementById('add-key-form').reset();
+        }
+
+        document.getElementById('add-key-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = {
+                name: document.getElementById('key-name').value,
+                public_key: document.getElementById('public-key').value
+            };
+
+            fetch('/api/ssh-keys/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to add key');
+                hideAddKeyModal();
+                loadSSHKeys();
+            })
+            .catch(error => alert('Error: ' + error.message));
+        });
+
+        function deleteKey(keyId) {
+            if (!confirm('Are you sure you want to delete this SSH key?')) return;
+
+            fetch(`/api/ssh-keys/${keyId}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to delete key');
+                loadSSHKeys();
+            })
+            .catch(error => alert('Error: ' + error.message));
+        }
+    </script>
+</body>
+</html>

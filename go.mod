@@ -5,8 +5,10 @@ go 1.21
 require github.com/go-git/go-git/v5 v5.13.1
 
 require (
+	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	golang.org/x/text v0.21.0 // indirect
 )
