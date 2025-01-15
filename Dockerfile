@@ -22,15 +22,15 @@ RUN apk add --no-cache git
 COPY --from=builder /app/simplegit .
 COPY static/ static/
 COPY templates/ templates/
-COPY config.json .
 
-RUN mkdir -p repositories && \
-    mkdir -p data && \
+# Create necessary directories with correct permissions
+RUN mkdir -p repositories data ssh && \
     adduser -D -h /app gituser && \
     chown -R gituser:gituser /app/repositories && \
-    chown -R gituser:gituser /app/data
+    chown -R gituser:gituser /app/data && \
+    chown -R gituser:gituser /app/ssh
 
 USER gituser
 
-EXPOSE 3000
+EXPOSE 3000 2222
 CMD ["./simplegit"]

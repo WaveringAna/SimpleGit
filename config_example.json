@@ -1,0 +1,13 @@
+{
+    "dev_mode": false,
+    "port": 3000,
+    "ssh_port": 2222,
+    "date_format": "Jan 2, 2006 15:04:05",
+    "max_file_size": 20485760,
+    "data_dir": "data",
+    "repo_path": "repositories",
+    "db_path": "data/githost.db",
+    "jwt_secret": "change-this-to-a-secure-secret-in-production",
+    "domain": "localhost",
+    "ssh_key_path": "ssh/host_key"
+}

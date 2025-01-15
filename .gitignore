@@ -3,6 +3,7 @@ data/
 *.db
 admin_setup_token.txt
 ssh/host_key
+config.json
 
 # Binaries for programs and plugins
 *.exe
