@@ -15,14 +15,16 @@ import (
 
 func (s *Server) handleAdminDashboard(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
-		"Repos": s.Repos,
+		"AdminPage": "dashboard",
+		"Repos":     s.Repos,
 	}
-	s.tmpl.ExecuteTemplate(w, "admin-dashboard.html", data)
+	s.tmpl.ExecuteTemplate(w, "admin-dashboard.html", s.addCommonData(r, data))
 }
 
 func (s *Server) handleAdminRepos(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
-		"Repos": s.Repos,
+		"AdminPage": "dashboard",
+		"Repos":     s.Repos,
 	}
 	s.tmpl.ExecuteTemplate(w, "admin-repos.html", data)
 }
@@ -35,7 +37,8 @@ func (s *Server) handleAdminUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := map[string]interface{}{
-		"Users": users,
+		"AdminPage": "dashboard",
+		"Users":     users,
 	}
 	s.tmpl.ExecuteTemplate(w, "admin-users.html", data)
 }

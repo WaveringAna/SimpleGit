@@ -6,17 +6,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-    <header>
+    {{template "navbar" .}}
+    <!--<header>
         <div class="header-content">
-            <h1><a href="/">Git Server</a> / Profile</h1>
-            <nav class="user-nav">
-                {{if .User.IsAdmin}}
-                <a href="/admin" title="Admin Dashboard"><i class="fa-solid fa-gauge-high"></i></a>
-                {{end}}
-                <a href="/logout" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></a>
+            <h1><a href="/">Git Server</a> / Admin</h1>
+            <nav class="admin-nav">
+                <a href="/admin" class="active">Dashboard</a>
+                <a href="/admin/repos">Repositories</a>
+                <a href="/admin/users">Users</a>
+                <a href="/logout">Logout</a>
             </nav>
         </div>
-    </header>
+    </header>-->
 
     <main>
         <div class="profile-container">

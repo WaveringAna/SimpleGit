@@ -8,17 +8,18 @@
 
 </head>
 <body>
-    <header>
+    {{template "navbar" .}}
+    <!--<header>
         <div class="header-content">
             <h1><a href="/">Git Server</a> / Admin</h1>
             <nav class="admin-nav">
-                <a href="/admin">Dashboard</a>
+                <a href="/admin" class="active">Dashboard</a>
                 <a href="/admin/repos">Repositories</a>
-                <a href="/admin/users" class="active">Users</a>
+                <a href="/admin/users">Users</a>
                 <a href="/logout">Logout</a>
             </nav>
         </div>
-    </header>
+    </header>-->
 
     <main>
         <div class="admin-container">

@@ -3,9 +3,26 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 )
+
+func (s *Server) addUserData(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Try to get user from cookie, but don't require it
+		cookie, err := r.Cookie("auth_token")
+		if err == nil {
+			user, err := s.userService.VerifyToken(cookie.Value)
+			if err == nil {
+				// Add user to request context
+				r.Header.Set("User-ID", user.ID)
+				r.Header.Set("User-Admin", fmt.Sprintf("%v", user.IsAdmin))
+			}
+		}
+		next.ServeHTTP(w, r)
+	}
+}
 
 func (s *Server) SetupRoutes() {
 	// Static files
@@ -22,11 +39,11 @@ func (s *Server) SetupRoutes() {
 	})
 
 	// HTML routes
-	http.HandleFunc("/", s.handleIndex)
-	http.HandleFunc("/repo/", s.handleRepo)
-	http.HandleFunc("/file/", s.handleViewFile)
-	http.HandleFunc("/commit/", s.handleViewCommit)
-	http.HandleFunc("/raw/", s.handleRawFile)
+	http.HandleFunc("/", s.addUserData(s.handleIndex))
+	http.HandleFunc("/repo/", s.addUserData(s.handleRepo))
+	http.HandleFunc("/file/", s.addUserData(s.handleViewFile))
+	http.HandleFunc("/commit/", s.addUserData(s.handleViewCommit))
+	http.HandleFunc("/raw/", s.addUserData(s.handleRawFile))
 
 	//Auth Route
 	http.HandleFunc("/login", s.handleLogin)

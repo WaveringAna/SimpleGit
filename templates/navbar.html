@@ -1,0 +1,61 @@
+<!-- templates/navbar.html -->
+{{define "navbar"}}
+<header>
+    <div class="header-content">
+        <h1>
+            <a href="/">Git Server</a>
+            {{if .Repo}}
+                / <a href="/repo/{{.Repo.Name}}">{{.Repo.Name}}</a>
+                {{if .Path}}
+                    {{$repo := .Repo.Name}}
+                    {{$parts := split .Path "/"}}
+                    {{$path := ""}}
+                    {{range $i, $part := $parts}}
+                        {{if lt $i (sub (len $parts) 1)}}
+                            {{$path = printf "%s/%s" $path $part}}
+                            / <a href="/repo/{{$repo}}{{$path}}">{{$part}}</a>
+                        {{else}}
+                            / {{$part}}
+                        {{end}}
+                    {{end}}
+                {{end}}
+            {{else}}
+                {{if .AdminPage}}
+                    / Admin
+                {{else}}
+                    / Repositories
+                {{end}}
+            {{end}}
+        </h1>
+        {{if and (not .IsEmpty) .Branches}}
+        <div class="branch-selector">
+            <select onchange="window.location.href='?branch=' + this.value">
+                {{range .Branches}}
+                <option value="{{.}}" {{if eq . $.Branch}}selected{{end}}>{{.}}</option>
+                {{end}}
+            </select>
+        </div>
+        {{end}}
+        {{if .AdminPage}}
+        <nav class="admin-nav">
+            <a href="/admin" {{if eq .AdminPage "dashboard"}}class="active"{{end}}>Dashboard</a>
+            <a href="/admin/repos" {{if eq .AdminPage "repos"}}class="active"{{end}}>Repositories</a>
+            <a href="/admin/users" {{if eq .AdminPage "users"}}class="active"{{end}}>Users</a>
+            <a href="/logout">Logout</a>
+        </nav>
+        {{else}}
+        <nav class="user-nav">
+            {{if .User}}
+                {{if .User.IsAdmin}}
+                <a href="/admin" title="Admin Dashboard"><i class="fa-solid fa-gauge-high"></i></a>
+                {{end}}
+                <a href="/profile" title="Profile"><i class="fa-solid fa-user"></i></a>
+                <a href="/logout" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></a>
+            {{else}}
+                <a href="/login" title="Login"><i class="fa-solid fa-right-to-bracket"></i></a>
+            {{end}}
+        </nav>
+        {{end}}
+    </div>
+</header>
+{{end}}

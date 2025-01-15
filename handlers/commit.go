@@ -231,7 +231,7 @@ func (s *Server) handleViewCommit(w http.ResponseWriter, r *http.Request) {
 		"Diffs": diffs,
 	}
 
-	if err := s.tmpl.ExecuteTemplate(w, "commit.html", data); err != nil {
+	if err := s.tmpl.ExecuteTemplate(w, "commit.html", s.addCommonData(r, data)); err != nil {
 		models.HandleError(w, r, models.NewInternalError("Failed to render template").WithError(err))
 		return
 	}

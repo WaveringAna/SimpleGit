@@ -16,21 +16,24 @@ FROM alpine:latest
 WORKDIR /app
 
 # Install runtime dependencies
-RUN apk add --no-cache git
+RUN apk add --no-cache git sqlite
 
 # Copy binary and static assets
 COPY --from=builder /app/simplegit .
 COPY static/ static/
 COPY templates/ templates/
-COPY config.json .
 
-RUN mkdir -p repositories && \
-    mkdir -p data && \
+# Create necessary directories with correct permissions
+RUN mkdir -p /app/repositories /app/data /app/ssh && \
     adduser -D -h /app gituser && \
     chown -R gituser:gituser /app/repositories && \
-    chown -R gituser:gituser /app/data
+    chown -R gituser:gituser /app/data && \
+    chown -R gituser:gituser /app/ssh && \
+    chmod 755 /app/repositories && \
+    chmod 755 /app/data && \
+    chmod 755 /app/ssh
 
 USER gituser
 
-EXPOSE 3000
+EXPOSE 3000 2222
 CMD ["./simplegit"]

@@ -1,8 +1,7 @@
-//database/db.go
-
 package database
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 
@@ -21,12 +20,30 @@ func InitDB(dataDir string) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	dbPath := filepath.Join(dataDir, "githost.db")
+	dbPath := config.GlobalConfig.DBPath
+	if !filepath.IsAbs(dbPath) {
+		dbPath = filepath.Join(dataDir, dbPath)
+	}
+
+	// Ensure the directory for the database file exists
+	dbDir := filepath.Dir(dbPath)
+	if err := os.MkdirAll(dbDir, 0755); err != nil {
+		return nil, err
+	}
+
+	log.Printf("Using database file: %s", dbPath)
+
+	// If database file doesn't exist, create it (SQLite needs the directory to exist)
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		file, err := os.OpenFile(dbPath, os.O_RDWR|os.O_CREATE, 0600)
+		if err != nil {
+			return nil, err
+		}
+		file.Close()
+	}
 
 	// Configure GORM to use SQLite
-	gormConfig := &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
-	}
+	gormConfig := &gorm.Config{}
 
 	if config.GlobalConfig.DevMode {
 		gormConfig.Logger = logger.Default.LogMode(logger.Info)

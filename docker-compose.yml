@@ -5,11 +5,18 @@ services:
     build: .
     ports:
       - "3000:3000"
+      - "2222:2222"
     volumes:
       - ./repositories:/app/repositories
+      - ./data:/app/data
+      - ./ssh:/app/ssh
+    environment:
+      - SIMPLEGIT_PORT=3000
+      - SIMPLEGIT_SSH_PORT=2222
+      - SIMPLEGIT_JWT_SECRET=change-me-in-production
+      - SIMPLEGIT_DOMAIN=localhost
+      - SIMPLEGIT_MAX_FILE_SIZE=10485760
     restart: unless-stopped
-
-    # Optional: resource limits
     deploy:
       resources:
         limits:

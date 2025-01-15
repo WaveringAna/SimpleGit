@@ -27,6 +27,7 @@ func NewServer(repoPath string, userService *models.UserService) (*Server, error
 		repoPath:    repoPath,
 	}
 
+	// TODO figure out how to default to PublicKeyCallback while allowing KeyboardInteractiveCallback
 	config := &ssh.ServerConfig{
 		PublicKeyCallback: server.authenticateKey,
 		//KeyboardInteractiveCallback: server.keyboardInteractiveCallback,
