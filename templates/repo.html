@@ -7,20 +7,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            <h1><a href="/">Git Server</a> / {{.Repo.Name}}</h1>
-            {{if not .IsEmpty}}
-            <div class="branch-selector">
-                <select onchange="window.location.href='?branch=' + this.value">
-                    {{range .Branches}}
-                    <option value="{{.}}" {{if eq . $.Branch}}selected{{end}}>{{.}}</option>
-                    {{end}}
-                </select>
-            </div>
-            {{end}}
-        </div>
-    </header>
+    {{template "navbar" dict 
+        "User" .User 
+        "Title" .Repo.Name 
+        "RepoName" .Repo.Name 
+        "Path" .Path 
+        "ShowBranches" (not .IsEmpty)
+        "Branches" .Branches 
+        "CurrentBranch" .Branch
+    }}
 
     <main>
         {{if .IsEmpty}}
@@ -38,17 +33,6 @@ git push origin main</pre>
         {{else}}
         <div class="repo-content">
             <div class="file-browser">
-                <div class="path-nav">
-                    <a href="/repo/{{.Repo.Name}}">{{.Repo.Name}}</a>
-                    {{$repo := .Repo.Name}}
-                    {{$parts := split .Path "/"}}
-                    {{$path := ""}}
-                    {{range $parts}}
-                        {{$path = printf "%s/%s" $path .}}
-                        / <a href="/repo/{{$repo}}{{$path}}">{{.}}</a>
-                    {{end}}
-                </div>
-
                 <table class="files">
                     <thead>
                         <tr>

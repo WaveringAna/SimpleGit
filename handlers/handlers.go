@@ -81,6 +81,20 @@ func NewServer(repoPath string) (*Server, error) {
 			return s
 		},
 		"getFileIcon": utils.GetFileIcon,
+		"dict": func(values ...interface{}) (map[string]interface{}, error) {
+			if len(values)%2 != 0 {
+				return nil, fmt.Errorf("invalid dict call")
+			}
+			dict := make(map[string]interface{}, len(values)/2)
+			for i := 0; i < len(values); i += 2 {
+				key, ok := values[i].(string)
+				if !ok {
+					return nil, fmt.Errorf("dict keys must be strings")
+				}
+				dict[key] = values[i+1]
+			}
+			return dict, nil
+		},
 	}
 
 	// Parse templates
@@ -126,6 +140,7 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := map[string]interface{}{
+		"Title": "Repositories",
 		"Repos": s.Repos,
 	}
 
@@ -337,7 +352,7 @@ func (s *Server) handleViewFile(w http.ResponseWriter, r *http.Request) {
 		"Symbols": symbols,
 	}
 
-	if err := s.tmpl.ExecuteTemplate(w, "file.html", data); err != nil {
+	if err := s.tmpl.ExecuteTemplate(w, "file.html", s.addCommonData(r, data)); err != nil {
 		models.HandleError(w, r, models.NewInternalError("Failed to render template").WithError(err))
 	}
 }
