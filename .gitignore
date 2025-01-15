@@ -3,6 +3,9 @@ data/
 *.db
 admin_setup_token.txt
 ssh/host_key
+**/config.json
+**/node_modules/
+node_modules
 config.json
 
 # Binaries for programs and plugins

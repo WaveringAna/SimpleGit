@@ -48,6 +48,7 @@
                         </a>
                     </div>
                 </div>
+                <!--
                 <div class="code-container">
                     <table class="line-numbers-table">
                         <tbody>
@@ -60,6 +61,19 @@
                         </tbody>
                     </table>
                 </div>
+                -->
+                <div class="code-container">
+                    <table class="line-numbers-table">
+                        <tbody>
+                            {{range $index, $line := .Lines}}
+                            <tr>
+                                <td class="line-number" id="L{{add $index 1}}">{{add $index 1}}</td>
+                                <td class="line-content"><pre><code>{{if eq $line ""}}&#x200b;{{else}}{{safeHTML $line}}{{end}}</code></pre></td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>                
             </div>
             <div class="symbol-sidebar">
                 <div class="symbol-header">

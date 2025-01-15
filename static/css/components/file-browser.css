@@ -213,8 +213,10 @@ table.files a:hover {
 .code-container {
     position: relative;
     background: #262931;
-    min-width: fit-content;
+    min-width: 0; /* Allow container to shrink */
+    overflow-x: auto; /* Handle overflow */
 }
+
 
 .line-numbers-table {
     width: 100%;
@@ -223,10 +225,25 @@ table.files a:hover {
     font-size: 14px;
     line-height: 1.5;
     background: #262931;
+    table-layout: fixed; /* Important for consistent column widths */
+}
+
+.line-numbers-table td {
+    /*padding: 0;*/
+    height: 1.5em;
 }
 
 .line-numbers-table tr:hover {
     background: #2E323A;
+}
+
+.line-numbers-table td:first-child {
+    width: 3rem; /* Match the line-number width */
+}
+
+/* Let the content column take remaining space */
+.line-numbers-table td:nth-child(2) {
+    width: auto;
 }
 
 .line-number {
@@ -234,22 +251,33 @@ table.files a:hover {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    padding: 0 1rem;
-    min-width: 40px;
+    width: 3rem; /* Fixed width */
+    min-width: 3rem; /* Ensure minimum width */
+    max-width: 3rem; /* Enforce maximum width */
+    padding: 0 0.5rem !important; /* Smaller, fixed padding */
     text-align: right;
     color: #636B7B;
     border-right: 1px solid #2E323A;
     background: #1F2126;
+    vertical-align: top; /* Align with code content */
 }
 
 .line-content {
     padding: 0 1rem;
     white-space: pre;
+    width: 100%; /* Take up remaining space */
+}
+
+.line-content pre {
+    margin: 0 !important;
+    padding: 0 1rem !important;
+    white-space: pre !important;
 }
 
 .line-content code {
     background: transparent !important;
     padding: 0 !important;
+    white-space: pre !important;
     color: #E5E9F0;
 }
 

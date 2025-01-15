@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"log"
 	"mime"
 	"net/http"
 	"os"
@@ -15,6 +16,7 @@ import (
 
 	"SimpleGit/config"
 	"SimpleGit/models"
+	"SimpleGit/services"
 	"SimpleGit/utils"
 
 	"github.com/go-git/go-git/v5/plumbing"
@@ -36,6 +38,7 @@ type Server struct {
 	tmpl        *template.Template
 	userService *models.UserService
 	db          *gorm.DB
+	tsService   *services.TSService
 }
 
 // NewServer creates a new server instance with the given repository path.
@@ -48,8 +51,9 @@ func NewServer(repoPath string) (*Server, error) {
 	}
 
 	s := &Server{
-		RepoPath: repoPath,
-		Repos:    make(map[string]*models.Repository),
+		RepoPath:  repoPath,
+		Repos:     make(map[string]*models.Repository),
+		tsService: services.NewTSService(),
 	}
 
 	// Create template functions
@@ -94,6 +98,9 @@ func NewServer(repoPath string) (*Server, error) {
 				dict[key] = values[i+1]
 			}
 			return dict, nil
+		},
+		"safeHTML": func(s string) template.HTML {
+			return template.HTML(s)
 		},
 	}
 
@@ -339,17 +346,43 @@ func (s *Server) handleViewFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Split content into lines
-	lines := strings.Split(string(content), "\n")
+	//lines := strings.Split(string(content), "\n")
 
 	// Parse symbols from content
 	symbols := utils.ParseSymbols(content)
 
+	ext := filepath.Ext(path)
+	if ext != "" {
+		ext = ext[1:] // Remove the leading dot
+	}
+
+	result, err := s.tsService.Highlight(string(content), ext, path)
+
+	if err != nil {
+		// Fallback to simple line splitting if TS service fails
+		log.Printf("TS service error: %v, falling back to basic display", err)
+		lines := strings.Split(string(content), "\n")
+		data := map[string]interface{}{
+			"Repo":    repo,
+			"Path":    path,
+			"Lines":   lines,
+			"Size":    int64(len(content)),
+			"Symbols": utils.ParseSymbols(content), // Use your existing symbol parsing
+			"Branch":  branch,
+		}
+		s.tmpl.ExecuteTemplate(w, "file.html", s.addCommonData(r, data))
+		return
+	}
+
+	highlightedLines := strings.Split(result.Highlighted, "\n")
+
 	data := map[string]interface{}{
 		"Repo":    repo,
 		"Path":    path,
-		"Lines":   lines,
+		"Lines":   highlightedLines,
 		"Size":    int64(len(content)),
 		"Symbols": symbols,
+		"Branch":  branch,
 	}
 
 	if err := s.tmpl.ExecuteTemplate(w, "file.html", s.addCommonData(r, data)); err != nil {
