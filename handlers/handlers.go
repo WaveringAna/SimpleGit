@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"SimpleGit/config"
@@ -33,12 +34,78 @@ import (
 //   - userService: The user service instance.
 //   - db: The database instance.
 type Server struct {
-	RepoPath    string
-	Repos       map[string]*models.Repository
-	tmpl        *template.Template
-	userService *models.UserService
-	db          *gorm.DB
-	tsService   *services.TSService
+	RepoPath       string
+	Repos          map[string]*models.Repository
+	tmpl           *template.Template
+	userService    *models.UserService
+	db             *gorm.DB
+	tsService      *services.TSService
+	HighlightCache *HighlightCache
+}
+
+// HighlightCache represents a cache for highlighted code.
+//
+// Parameters:
+//   - RWMutex: A read-write mutex for concurrent access.
+//   - entries: A map of file paths to highlight responses.
+//   - maxSize: The maximum number of entries to store.
+type HighlightCache struct {
+	sync.RWMutex
+	entries map[string]HighlightCacheEntry
+	maxSize int
+}
+
+type HighlightCacheEntry struct {
+	Response  services.HighlightResponse
+	CreatedAt time.Time
+}
+
+func NewHighlightCache(maxSize int) *HighlightCache {
+	return &HighlightCache{
+		entries: make(map[string]HighlightCacheEntry),
+		maxSize: maxSize,
+	}
+}
+
+func (c *HighlightCache) Get(key string) (services.HighlightResponse, bool) {
+	c.RLock()
+	defer c.RUnlock()
+
+	entry, exists := c.entries[key]
+
+	// Optional: Implement cache expiration (e.g., 1 hour)
+	if exists && time.Since(entry.CreatedAt) < time.Hour {
+		return entry.Response, true
+	}
+
+	return services.HighlightResponse{}, false
+}
+
+func (c *HighlightCache) Set(key string, value services.HighlightResponse) {
+	c.Lock()
+	defer c.Unlock()
+
+	// Implement LRU with size limit
+	if len(c.entries) >= c.maxSize {
+		var oldestKey string
+		var oldestTime time.Time
+
+		for k, entry := range c.entries {
+			if oldestKey == "" || entry.CreatedAt.Before(oldestTime) {
+				oldestKey = k
+				oldestTime = entry.CreatedAt
+			}
+		}
+
+		if oldestKey != "" {
+			delete(c.entries, oldestKey)
+		}
+	}
+
+	c.entries[key] = HighlightCacheEntry{
+		Response:  value,
+		CreatedAt: time.Now(),
+	}
 }
 
 // NewServer creates a new server instance with the given repository path.
@@ -356,8 +423,24 @@ func (s *Server) handleViewFile(w http.ResponseWriter, r *http.Request) {
 		ext = ext[1:] // Remove the leading dot
 	}
 
-	result, err := s.tsService.Highlight(string(content), ext, path)
+	// Generate a cache key
+	cacheKey := fmt.Sprintf("%s-%s-%d", path, ext, len(content))
 
+	// Check cache for highlighted content
+	if cachedResult, found := s.HighlightCache.Get(cacheKey); found {
+		data := map[string]interface{}{
+			"Repo":    repo,
+			"Path":    path,
+			"Lines":   strings.Split(cachedResult.Highlighted, "\n"),
+			"Size":    int64(len(content)),
+			"Symbols": utils.ParseSymbols(content),
+			"Branch":  branch,
+		}
+		s.tmpl.ExecuteTemplate(w, "file.html", s.addCommonData(r, data))
+		return
+	}
+
+	result, err := s.tsService.Highlight(string(content), ext, path)
 	if err != nil {
 		// Fallback to simple line splitting if TS service fails
 		log.Printf("TS service error: %v, falling back to basic display", err)
@@ -373,6 +456,8 @@ func (s *Server) handleViewFile(w http.ResponseWriter, r *http.Request) {
 		s.tmpl.ExecuteTemplate(w, "file.html", s.addCommonData(r, data))
 		return
 	}
+
+	s.HighlightCache.Set(cacheKey, *result)
 
 	highlightedLines := strings.Split(result.Highlighted, "\n")
 

@@ -32,6 +32,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	server.HighlightCache = handlers.NewHighlightCache(1000)
+
 	// Set database and user service
 	server.SetDB(db)
 	server.SetUserService(userService)

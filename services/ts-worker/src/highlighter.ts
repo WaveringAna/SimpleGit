@@ -46,7 +46,6 @@ export class Highlighter {
 
     this.cacheResult(cacheKey, result)
 
-    //console.log("highlighted code: ", result.highlighted)
     return result;
   }
 
