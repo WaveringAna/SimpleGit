@@ -1,8 +1,23 @@
-import { HighlightRequest, HighlightResponse } from './types';
+import { HighlightRequest, HighlightResponse, LanguageMap, DEFAULT_LANGUAGE_MAP } from './types';
 import hljs from 'highlight.js';
 
 export class Highlighter {
+  private languageMap: LanguageMap;
+
+  constructor(customLanguageMap?: LanguageMap) {
+    this.languageMap = customLanguageMap || DEFAULT_LANGUAGE_MAP;
+  }
+
+  private cache = new Map<string, HighlightResponse>()
+  private MAX_CACHE_SIZE = 500 // Can be adjustable via config maybe
+
   highlight(request: HighlightRequest): HighlightResponse {
+    const cacheKey = this.generateCacheKey(request);
+
+    const cachedResult = this.cache.get(cacheKey);
+    if (cachedResult)
+      return cachedResult;
+
     let language = request.language;
     
     if (!language && request.filename) {
@@ -24,22 +39,46 @@ export class Highlighter {
       return result.value;
     });
 
-    return {
+     const result = {
       highlighted: highlightedLines.join('\n'),
       detectedLanguage: language || 'plaintext'
     };
+
+    this.cacheResult(cacheKey, result)
+
+    //console.log("highlighted code: ", result.highlighted)
+    return result;
+  }
+
+  private generateCacheKey(request: HighlightRequest): string {
+    // Create a hash-like key from the request propertites
+    return `${request.filename || 'unknown'}-${request.language || 'auto'}-${this.hashCode(request.code)}`;
+  }
+
+  private hashCode(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash);
+  }
+
+  private cacheResult(key: string, result: HighlightResponse) {
+    // Implement LRU cache eviction
+    if (this.cache.size >= this.MAX_CACHE_SIZE) {
+      const oldestKey = this.cache.keys().next().value;
+      if (oldestKey !== undefined) {
+        this.cache.delete(oldestKey);
+      }
+    }
+    this.cache.set(key, result);
   }
 
   private detectLanguageFromFilename(filename: string): string {
     const ext = filename.split('.').pop()?.toLowerCase();
-    const languageMap: Record<string, string> = {
-      'ts': 'typescript',
-      'js': 'javascript',
-      'py': 'python',
-      'go': 'go',
-      // Add more mappings as needed
-    };
-    return languageMap[ext || ''] || '';
+    return this.languageMap[ext || ''] || '';
   }
 
   /*
