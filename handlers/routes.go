@@ -37,7 +37,7 @@ func (s *Server) SetupRoutes() {
 	http.HandleFunc("/api/repos", s.requireAuth(s.handleListRepos))
 	http.HandleFunc("/api/ssh-keys", s.requireAuth(s.handleListSSHKeys))
 	http.HandleFunc("/api/ssh-keys/add", s.requireAuth(s.handleAddSSHKey))
-	http.HandleFunc("/api/ssh-keys/{id}", s.requireAuth(s.handleDeleteSSHKey))
+	http.HandleFunc("/api/ssh-keys/", s.requireAuth(s.handleDeleteSSHKey))
 
 	// Admin routes
 	http.HandleFunc("/setup-admin", s.handleAdminSetup)
@@ -46,4 +46,6 @@ func (s *Server) SetupRoutes() {
 	http.HandleFunc("/admin/users", s.requireAdmin(s.handleAdminUsers))
 	http.HandleFunc("/admin/users/create", s.requireAdmin(s.handleCreateUser))
 	http.HandleFunc("/admin/repos/create", s.requireAdmin(s.handleCreateRepo))
+	http.HandleFunc("/admin/users/", s.requireAdmin(s.handleDeleteUser))
+	http.HandleFunc("/admin/repos/", s.requireAdmin(s.handleDeleteRepo))
 }

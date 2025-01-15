@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/go-git/go-git/v5"
@@ -116,4 +117,60 @@ func (s *Server) handleCreateRepo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/admin/repos", http.StatusSeeOther)
+}
+
+func (s *Server) handleDeleteUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "DELETE" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Extract user ID from URL
+	parts := strings.Split(r.URL.Path, "/")
+	if len(parts) < 4 {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+	userID := parts[3]
+
+	// Delete the user from the database
+	if err := s.db.Delete(&models.User{}, "id = ?", userID).Error; err != nil {
+		http.Error(w, "Failed to delete user", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (s *Server) handleDeleteRepo(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "DELETE" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Extract repository name from URL
+	parts := strings.Split(r.URL.Path, "/")
+	if len(parts) < 4 {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+	repoName := parts[3]
+
+	// Get repository path
+	repo, ok := s.Repos[repoName]
+	if !ok {
+		http.Error(w, "Repository not found", http.StatusNotFound)
+		return
+	}
+
+	// Delete repository directory
+	if err := os.RemoveAll(repo.Path); err != nil {
+		http.Error(w, "Failed to delete repository", http.StatusInternalServerError)
+		return
+	}
+
+	// Remove from repositories map
+	delete(s.Repos, repoName)
+
+	w.WriteHeader(http.StatusOK)
 }

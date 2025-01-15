@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
-
-	"github.com/gorilla/mux"
 )
 
 type SSHKeyRequest struct {
@@ -66,22 +64,29 @@ func (s *Server) handleListSSHKeys(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleDeleteSSHKey(w http.ResponseWriter, r *http.Request) {
-    user, err := s.getUserFromRequest(r)
-    if err != nil {
-        models.HandleError(w, r, models.NewUnauthorizedError("Not authenticated"))
-        return
-    }
+	if r.Method != "DELETE" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
-    keyID := mux.Vars(r)["id"]
-    if keyID == "" {
-        models.HandleError(w, r, models.NewBadRequestError("Key ID is required"))
-        return
-    }
+	user, err := s.getUserFromRequest(r)
+	if err != nil {
+		models.HandleError(w, r, models.NewUnauthorizedError("Not authenticated"))
+		return
+	}
 
-    if err := s.userService.DeleteSSHKey(user.ID, keyID); err != nil {
-        models.HandleError(w, r, models.NewInternalError("Failed to delete SSH key").WithError(err))
-        return
-    }
+	// Extract key ID from URL
+	parts := strings.Split(r.URL.Path, "/")
+	if len(parts) < 4 {
+		models.HandleError(w, r, models.NewBadRequestError("Key ID is required"))
+		return
+	}
+	keyID := parts[3]
 
-    w.WriteHeader(http.StatusNoContent)
+	if err := s.userService.DeleteSSHKey(user.ID, keyID); err != nil {
+		models.HandleError(w, r, models.NewInternalError("Failed to delete SSH key").WithError(err))
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
