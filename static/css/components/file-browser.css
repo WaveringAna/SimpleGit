@@ -1,10 +1,11 @@
-/* File browser */
+/* File Browser Layout */
 .file-browser {
     background: #262931;
     border: 1px solid #2E323A;
     border-radius: 6px;
 }
 
+/* Path Navigation */
 .path-nav {
     padding: 1rem;
     border-bottom: 1px solid #363B44;
@@ -21,7 +22,7 @@
     text-decoration: underline;
 }
 
-/* File list table */
+/* File List Table */
 table.files {
     width: 100%;
     border-collapse: collapse;
@@ -58,7 +59,7 @@ table.files a:hover {
     text-decoration: underline;
 }
 
-/* File view styles */
+/* File Content View */
 .file-content {
     background: #262931;
     border: 1px solid #2E323A;
@@ -84,6 +85,7 @@ table.files a:hover {
     color: #ABB2BF;
 }
 
+/* File Actions */
 .file-actions {
     display: flex;
     gap: 0.5rem;
@@ -112,13 +114,13 @@ table.files a:hover {
     font-size: 0.9rem;
 }
 
-/* Style for copy button feedback */
 .btn.copied {
     background: #98C379;
     border-color: #98C379;
     color: #262931;
 }
 
+/* File Body */
 .file-body {
     margin: 0;
     padding: 1rem;
@@ -129,13 +131,14 @@ table.files a:hover {
     tab-size: 4;
 }
 
+/* Layout Grid */
 .file-view {
     display: grid;
     grid-template-columns: 1fr 250px;
     gap: 1rem;
 }
 
-/* Symbol sidebar */
+/* Symbol Sidebar */
 .symbol-sidebar {
     background: #262931;
     border: 1px solid #2E323A;
@@ -209,14 +212,13 @@ table.files a:hover {
     flex: 1;
 }
 
-/* Code view */
+/* Code Container and Line Numbers */
 .code-container {
     position: relative;
     background: #262931;
-    min-width: 0; /* Allow container to shrink */
-    overflow-x: auto; /* Handle overflow */
+    min-width: 0;
+    overflow-x: auto;
 }
-
 
 .line-numbers-table {
     width: 100%;
@@ -225,11 +227,10 @@ table.files a:hover {
     font-size: 14px;
     line-height: 1.5;
     background: #262931;
-    table-layout: fixed; /* Important for consistent column widths */
+    table-layout: fixed;
 }
 
 .line-numbers-table td {
-    /*padding: 0;*/
     height: 1.5em;
 }
 
@@ -238,10 +239,9 @@ table.files a:hover {
 }
 
 .line-numbers-table td:first-child {
-    width: 3rem; /* Match the line-number width */
+    width: 3rem;
 }
 
-/* Let the content column take remaining space */
 .line-numbers-table td:nth-child(2) {
     width: auto;
 }
@@ -251,21 +251,22 @@ table.files a:hover {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    width: 3rem; /* Fixed width */
-    min-width: 3rem; /* Ensure minimum width */
-    max-width: 3rem; /* Enforce maximum width */
-    padding: 0 0.5rem !important; /* Smaller, fixed padding */
+    width: 3rem;
+    min-width: 3rem;
+    max-width: 3rem;
+    padding: 0 0.5rem !important;
     text-align: right;
     color: #636B7B;
     border-right: 1px solid #2E323A;
     background: #1F2126;
-    vertical-align: top; /* Align with code content */
+    vertical-align: top;
 }
 
+/* Line Content */
 .line-content {
     padding: 0 1rem;
     white-space: pre;
-    width: 100%; /* Take up remaining space */
+    width: 100%;
 }
 
 .line-content pre {
@@ -281,6 +282,7 @@ table.files a:hover {
     color: #E5E9F0;
 }
 
+/* Highlighting */
 tr.highlighted {
     background-color: #363B44 !important;
     transition: background-color 0.5s ease;

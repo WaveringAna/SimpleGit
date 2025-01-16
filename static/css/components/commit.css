@@ -1,16 +1,17 @@
-/* Commit history */
+/* Commit History Section */
 .commit-history {
     background: #262931;
-    border: 1px solid #2e323a;
+    border: 1px solid #2E323A;
     border-radius: 6px;
 }
 
 .commit-history h2 {
     margin: 0;
     padding: 1rem;
-    border-bottom: 1px solid #2e323a;
+    border-bottom: 1px solid #2E323A;
     font-size: 1.2rem;
-    background: #2e323a;
+    background: #2E323A;
+    color: #E5E9F0;
 }
 
 .commits {
@@ -20,7 +21,7 @@
 
 .commit {
     padding: 1rem;
-    border-bottom: 1px solid #2e323a;
+    border-bottom: 1px solid #2E323A;
 }
 
 .commit:last-child {
@@ -36,31 +37,32 @@
 }
 
 .commit-hash {
-    font-family: monospace;
-    color: #61afef;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    color: #61AFEF;
     text-decoration: none;
 }
 
 .commit-hash:hover {
-    color: #7bc3ff;
+    color: #7BC3FF;
     text-decoration: underline;
 }
 
 .commit-message {
-    color: #939ba6;
+    color: #939BA6;
     white-space: pre-line;
 }
 
-/* Commit view */
+/* Commit View Layout */
 .commit-view {
     max-width: 95vw;
     margin: 0 auto;
     padding: 2rem;
+    width: 100%;
 }
 
 .commit-details {
     background: #262931;
-    border: 1px solid #2e323a;
+    border: 1px solid #2E323A;
     border-radius: 6px;
     padding: 1.5rem;
     margin-bottom: 2rem;
@@ -68,7 +70,7 @@
 
 .commit-details h2 {
     margin: 0 0 1rem 0;
-    color: #e5e9f0;
+    color: #E5E9F0;
     font-size: 1.25rem;
     white-space: pre-line;
 }
@@ -76,28 +78,28 @@
 .commit-meta {
     display: flex;
     gap: 2rem;
-    color: #abb2bf;
+    color: #ABB2BF;
     font-size: 0.9rem;
     margin-bottom: 1rem;
 }
 
 .commit-meta i {
     margin-right: 0.5rem;
-    color: #636b7b;
+    color: #636B7B;
 }
 
-/* Diff view */
+/* File Diff Section */
 .file-diff {
     background: #262931;
-    border: 1px solid #2e323a;
+    border: 1px solid #2E323A;
     border-radius: 6px;
     margin-bottom: 1rem;
 }
 
 .file-header {
-    padding: 8px 16px;
-    background: #2e323a;
-    border: 1px solid #363b44;
+    padding: 0.75rem 1rem;
+    background: #2E323A;
+    border-bottom: 1px solid #363B44;
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
     display: flex;
@@ -106,8 +108,8 @@
 }
 
 .filename {
-    color: #e5e9f0;
-    font-family: ui-monospace, monospace;
+    color: #E5E9F0;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
     font-size: 14px;
 }
 
@@ -118,46 +120,54 @@
 }
 
 .additions {
-    color: #98c379;
+    color: #98C379;
 }
 
 .deletions {
-    color: #e06c75;
+    color: #E06C75;
 }
 
+/* Diff Table */
 .diff-table {
     width: 100%;
-    border-spacing: 0;
-    border-collapse: separate;
-    font-family: ui-monospace, monospace;
-    font-size: 0.75rem;
-    background: #1c1e26;
+    border-collapse: collapse;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    background: #262931;
+    table-layout: fixed;
 }
 
 .diff-table tr {
-    height: 1.25rem;
+    display: flex;
+    width: 100%;
+    overflow-x: auto;
+    height: 1.5em;
 }
 
 .diff-table td {
-    padding: 0 0.5rem;
-    line-height: 1.25rem;
+    padding: 0;
     vertical-align: top;
 }
 
 .diff-table .line-number {
-    width: 3.125rem;
+    flex: 0 0 3rem;
+    width: 3rem;
     text-align: right;
-    color: #636b7b;
-    background: #1c1e26;
-    border-right: 1px solid #2e323a;
+    padding: 0 0.5rem;
+    color: #636B7B;
+    background: #1F2126;
     user-select: none;
 }
 
 .diff-table .line-content {
+    flex: 1;
+    padding: 0 1rem;
     white-space: pre;
-    padding-left: 15px;
+    min-width: 0;
 }
 
+/* Diff Highlighting */
 .diff-table .addition {
     background: rgba(87, 171, 90, 0.15);
 }
@@ -175,13 +185,14 @@
 }
 
 .diff-table tr.context .line-content {
-    color: #abb2bf;
+    color: #ABB2BF;
 }
 
+/* Separator Styles */
 .separator {
     text-align: center;
-    color: #636b7b;
-    background: #2e323a;
+    color: #636B7B;
+    background: #2E323A;
 }
 
 .separator .line-content {
@@ -189,18 +200,18 @@
 }
 
 .separator .line-number {
-    background: #2e323a;
+    background: #2E323A;
 }
 
-/* Make comments even more visible in diffs */
+/* Syntax Highlighting in Diffs */
 .diff-table .line-content .hljs-comment {
-    color: #a1aaba;
+    color: #A1AABA;
 }
 
 .diff-table tr.addition .line-content .hljs-comment {
-    color: #6a8c6e;
+    color: #6A8C6E;
 }
 
 .diff-table tr.deletion .line-content .hljs-comment {
-    color: #a15a5f;
+    color: #A15A5F;
 }

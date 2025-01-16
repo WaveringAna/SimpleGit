@@ -24,6 +24,11 @@ export class Highlighter {
       language = this.detectLanguageFromFilename(request.filename);
     }
 
+    // if langauge is named 'diff', use passed langauge to highlight if it was passed
+    if (language === 'diff' && request.filename) {
+      language = this.detectLanguageFromFilename(request.filename);
+    }
+
     // Split the code into lines to highlight each line separately
     const lines = request.code.split('\n');
     const highlightedLines = lines.map(line => {

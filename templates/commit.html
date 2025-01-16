@@ -59,7 +59,7 @@
                         <tr class="{{.Type}}">
                             <td class="line-number">{{.OldNum}}</td>
                             <td class="line-number">{{.NewNum}}</td>
-                            <td class="line-content"><code>{{.Content}}</code></td>
+                            <td class="line-content"><code>{{if eq .HighlightedContent ""}}{{.Content}}{{else}}{{safeHTML .HighlightedContent}}{{end}}</code></td>
                         </tr>
                         {{end}}
                     </tbody>
@@ -71,6 +71,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
+            /*
             document.querySelectorAll('.file-diff').forEach((diff) => {
                 const filename = diff.querySelector('.filename').textContent;
                 const extension = filename.split('.').pop();
@@ -81,6 +82,7 @@
                     hljs.highlightElement(block);
                 });
             });
+            */
         });
     </script>
 </body>

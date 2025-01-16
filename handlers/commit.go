@@ -3,6 +3,7 @@ package handlers
 import (
 	"SimpleGit/models"
 	"net/http"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -28,10 +29,11 @@ type Diff struct {
 }
 
 type PatchInfo struct {
-	Content string `json:"content"`
-	Type    string `json:"type"`
-	OldNum  int    `json:"old_num"`
-	NewNum  int    `json:"new_num"`
+	Content            string `json:"content"`
+	HighlightedContent string `json:"highlighted_content"`
+	Type               string `json:"type"`
+	OldNum             int    `json:"old_num"`
+	NewNum             int    `json:"new_num"`
 }
 
 /*
@@ -183,6 +185,27 @@ func (s *Server) handleViewCommit(w http.ResponseWriter, r *http.Request) {
 					for _, line := range lines {
 						patchInfo := PatchInfo{
 							Content: line,
+						}
+
+						if line == "..." {
+							patchInfo.Type = "separator"
+							patchInfo.Content = line
+							patchInfo.HighlightedContent = line
+						} else {
+							// Get file extension for language detection
+							ext := filepath.Ext(diff.Path)
+							if ext != "" {
+								ext = ext[1:] // Remove the leading dot
+							}
+
+							// Highlight the content
+							result, err := s.tsService.Highlight(line, ext, diff.Path)
+							if err != nil {
+								// On error, fall back to unhighlighted content
+								patchInfo.HighlightedContent = line
+							} else {
+								patchInfo.HighlightedContent = result.Highlighted
+							}
 						}
 
 						// Set line numbers and type based on chunk type

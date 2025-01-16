@@ -62,7 +62,7 @@
                     </table>
                 </div>
                 -->
-                <div class="code-container">
+                <div class="code-container" data-content="{{range $index, $line := .Lines}}{{$line}}&#10;{{end}}">
                     <table class="line-numbers-table">
                         <tbody>
                             {{range $index, $line := .Lines}}
@@ -90,117 +90,5 @@
             </div>
         </div>
     </main>
-
-    <script src="/static/js/highlight.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
-            // Map file extensions to highlight.js language classes
-            const languageMap = {
-                'js': 'javascript',
-                'jsx': 'javascript',
-                'ts': 'typescript',
-                'tsx': 'typescript',
-                'py': 'python',
-                'rb': 'ruby',
-                'php': 'php',
-                'java': 'java',
-                'go': 'go',
-                'rs': 'rust',
-                'c': 'c',
-                'cpp': 'cpp',
-                'h': 'cpp',
-                'hpp': 'cpp',
-                'cs': 'csharp',
-                'css': 'css',
-                'scss': 'scss',
-                'less': 'less',
-                'html': 'html',
-                'xml': 'xml',
-                'md': 'markdown',
-                'json': 'json',
-                'yaml': 'yaml',
-                'yml': 'yaml',
-                'sh': 'bash',
-                'bash': 'bash',
-                'sql': 'sql',
-                'dockerfile': 'dockerfile',
-                'vue': 'vue',
-                'swift': 'swift',
-                'kt': 'kotlin',
-                'scala': 'scala',
-                'perl': 'perl',
-                'lua': 'lua',
-                'r': 'r'
-            };
-
-            // Highlight all code cells
-            document.querySelectorAll('.line-content code').forEach((block) => {
-                const path = '{{.Path}}';
-                const ext = path.split('.').pop().toLowerCase();
-                const language = languageMap[ext] || 'plaintext';
-                block.classList.add(`language-${language}`);
-                hljs.highlightElement(block);
-            });
-
-            // Add click handlers for symbol navigation
-            document.querySelectorAll('.symbol-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const lineId = item.getAttribute('href');
-                    const lineElement = document.querySelector(lineId);
-                    if (lineElement) {
-                        lineElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        // Add highlight effect
-                        lineElement.closest('tr').classList.add('highlighted');
-                        setTimeout(() => {
-                            lineElement.closest('tr').classList.remove('highlighted');
-                        }, 2000);
-                    }
-                });
-            });
-
-            const symbolList = document.querySelector('.symbol-list');
-    
-            // Add a class when scrollable
-            function updateScrollIndicator() {
-                if (symbolList.scrollHeight > symbolList.clientHeight) {
-                    symbolList.classList.add('is-scrollable');
-                } else {
-                    symbolList.classList.remove('is-scrollable');
-                }
-            }
-
-            // Update on content changes
-            updateScrollIndicator();
-    
-            // Optional: Update on window resize
-            window.addEventListener('resize', updateScrollIndicator);
-        });
-
-        function copyCode() {
-            // Get all code content
-            const codeLines = document.querySelectorAll('.line-content');
-            let codeText = '';
-            codeLines.forEach(line => {
-                codeText += line.textContent + '\n';
-            });
-            
-            // Copy to clipboard
-            navigator.clipboard.writeText(codeText).then(() => {
-                // Visual feedback
-                const copyBtn = document.querySelector('.fa-copy').parentElement;
-                copyBtn.classList.add('copied');
-                copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
-                
-                // Reset button after 2 seconds
-                setTimeout(() => {
-                    copyBtn.classList.remove('copied');
-                    copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> Copy';
-                }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy:', err);
-            });
-        }
-    </script>
 </body>
 </html>
