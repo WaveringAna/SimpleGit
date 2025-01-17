@@ -74,6 +74,58 @@ func (r *Repository) Git() (*git.Repository, error) {
 	return r.git, nil
 }
 
+func (r *Repository) getLatestDirCommit(dir string, commitHash plumbing.Hash) (string, error) {
+	// Get the commit
+	commit, err := r.git.CommitObject(commitHash)
+	if err != nil {
+		return "", err
+	}
+
+	var latestMessage string
+	var latestTime time.Time
+
+	// Set up log options to traverse all commits
+	logOpts := &git.LogOptions{
+		From:  commit.Hash,
+		Order: git.LogOrderCommitterTime,
+	}
+
+	// Get commit history
+	cIter, err := r.git.Log(logOpts)
+	if err != nil {
+		return "", err
+	}
+
+	// Traverse all commits
+	err = cIter.ForEach(func(c *object.Commit) error {
+		// For each commit, get its tree
+		tree, err := c.Tree()
+		if err != nil {
+			return err
+		}
+
+		// Check if any file in this directory was modified
+		tree.Files().ForEach(func(f *object.File) error {
+			if strings.HasPrefix(f.Name, dir+"/") {
+				// If this is the first modification we've found or it's more recent
+				if latestMessage == "" || c.Author.When.After(latestTime) {
+					latestMessage = c.Message
+					latestTime = c.Author.When
+				}
+			}
+			return nil
+		})
+
+		return nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	return latestMessage, nil
+}
+
 func (r *Repository) GetTree(path, ref string) ([]TreeEntry, error) {
 	if err := r.initGit(); err != nil {
 		return nil, err
@@ -121,13 +173,21 @@ func (r *Repository) GetTree(path, ref string) ([]TreeEntry, error) {
 			// Only add directory once
 			if !seenDirs[dirPath] {
 				seenDirs[dirPath] = true
+
+				// Get the latest commit that affected this directory
+				lastCommitMessage, err := r.getLatestDirCommit(dirPath, commit.Hash)
+				if err != nil {
+					// Fallback to current commit message if there's an error
+					lastCommitMessage = commit.Message
+				}
+
 				entries = append(entries, TreeEntry{
 					Name:    dirName,
 					Path:    dirPath,
 					Type:    "tree",
 					Size:    0,
 					Commit:  commit.Hash.String(),
-					Message: commit.Message,
+					Message: lastCommitMessage,
 				})
 			}
 		} else {
