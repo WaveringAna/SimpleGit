@@ -59,6 +59,14 @@ func main() {
 	sshServer, err := ssh.NewServer(
 		absRepoPath, // Use absolute path
 		userService,
+		func() {
+			// This callback will be called after git-receive-pack operations
+			if err := server.ScanRepositories(); err != nil {
+				log.Printf("Error rescanning repositories after update: %v", err)
+			} else {
+				log.Printf("Successfully rescanned repositories after update")
+			}
+		},
 	)
 	if err != nil {
 		log.Fatal("Failed to create SSH server:", err)

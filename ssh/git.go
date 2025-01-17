@@ -138,5 +138,9 @@ func (s *Server) executeGitCommand(cmd string, repoPath string, channel ssh.Chan
 		return fmt.Errorf("git command failed: %w", err)
 	}
 
+	if cmd == "git-receive-pack" && s.onUpdate != nil {
+		s.onUpdate()
+	}
+
 	return nil
 }

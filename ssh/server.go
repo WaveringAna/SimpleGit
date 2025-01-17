@@ -19,12 +19,14 @@ type Server struct {
 	config      *ssh.ServerConfig
 	userService *models.UserService
 	repoPath    string
+	onUpdate    func()
 }
 
-func NewServer(repoPath string, userService *models.UserService) (*Server, error) {
+func NewServer(repoPath string, userService *models.UserService, onUpdate func()) (*Server, error) {
 	server := &Server{
 		userService: userService,
 		repoPath:    repoPath,
+		onUpdate:    onUpdate,
 	}
 
 	// TODO figure out how to default to PublicKeyCallback while allowing KeyboardInteractiveCallback
