@@ -98,28 +98,72 @@ func (r *Repository) getLatestDirCommit(dir string, commitHash plumbing.Hash) (s
 
 	// Traverse all commits
 	err = cIter.ForEach(func(c *object.Commit) error {
-		// For each commit, get its tree
-		tree, err := c.Tree()
-		if err != nil {
-			return err
+		if latestMessage != "" && c.Author.When.Before(latestTime) {
+			// If we already found a more recent change, skip older commits
+			return nil
 		}
 
-		// Check if any file in this directory was modified
-		tree.Files().ForEach(func(f *object.File) error {
-			if strings.HasPrefix(f.Name, dir+"/") {
-				// If this is the first modification we've found or it's more recent
-				if latestMessage == "" || c.Author.When.After(latestTime) {
-					latestMessage = c.Message
-					latestTime = c.Author.When
+		// Get the parent commit to compare changes
+		parent, err := c.Parent(0)
+		if err == nil {
+			// Get the trees to compare
+			parentTree, err := parent.Tree()
+			if err != nil {
+				return nil
+			}
+			currentTree, err := c.Tree()
+			if err != nil {
+				return nil
+			}
+
+			// Get changes between parent and current commit
+			changes, err := currentTree.Diff(parentTree)
+			if err != nil {
+				return nil
+			}
+
+			// Check if any change affects our directory
+			for _, change := range changes {
+				changePath := change.From.Name
+				if change.From.Name == "" {
+					changePath = change.To.Name
+				}
+
+				// Check if this change is in our directory
+				if strings.HasPrefix(changePath, dir+"/") {
+					if latestMessage == "" || c.Author.When.After(latestTime) {
+						latestMessage = c.Message
+						latestTime = c.Author.When
+					}
+					return nil
 				}
 			}
-			return nil
-		})
+		} else if err == object.ErrParentNotFound {
+			// This is the initial commit, check all files
+			tree, err := c.Tree()
+			if err != nil {
+				return nil
+			}
+
+			found := false
+			tree.Files().ForEach(func(f *object.File) error {
+				if strings.HasPrefix(f.Name, dir+"/") {
+					found = true
+					return errors.New("found")
+				}
+				return nil
+			})
+
+			if found {
+				latestMessage = c.Message
+				latestTime = c.Author.When
+			}
+		}
 
 		return nil
 	})
 
-	if err != nil {
+	if err != nil && err.Error() != "found" {
 		return "", err
 	}
 
