@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -116,11 +117,6 @@ func (s *Server) handleGitCommand(cmd, repoPath string, channel ssh.Channel) err
 func (s *Server) executeGitCommand(cmd string, repoPath string, channel ssh.Channel) error {
 	log.Printf("Executing git command: %s %s", cmd, repoPath)
 
-	// Verify directory exists and is accessible
-	if _, err := os.Stat(repoPath); err != nil {
-		return fmt.Errorf("cannot access repository path: %w", err)
-	}
-
 	gitCmd := exec.Command(cmd, repoPath)
 	gitCmd.Dir = repoPath
 	gitCmd.Stdin = channel
@@ -138,8 +134,25 @@ func (s *Server) executeGitCommand(cmd string, repoPath string, channel ssh.Chan
 		return fmt.Errorf("git command failed: %w", err)
 	}
 
-	if cmd == "git-receive-pack" && s.onUpdate != nil {
-		s.onUpdate()
+	// If this was a receive-pack (push), wait a moment for git to finish writing refs
+	// and ensure the repository is in bare format
+	if cmd == "git-receive-pack" {
+		time.Sleep(100 * time.Millisecond) // Wait for git to finish writing refs
+
+		// Create a temporary Repository object to use EnsureBare
+		repo := &models.Repository{
+			Path: repoPath,
+		}
+		if err := repo.EnsureBare(); err != nil {
+			log.Printf("Warning: Failed to ensure repository is bare: %v", err)
+		}
+
+		// Notify about repository changes
+		if s.onUpdate != nil {
+			s.onUpdate()
+			// Wait another moment for the scan to complete
+			time.Sleep(100 * time.Millisecond)
+		}
 	}
 
 	return nil
