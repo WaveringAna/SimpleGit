@@ -13,10 +13,14 @@ RUN go build -o simplegit
 
 # Final stage
 FROM alpine:latest
-WORKDIR /app
 
 # Install runtime dependencies
 RUN apk add --no-cache git sqlite
+
+# Create non-root user
+RUN adduser -D -h /app gituser
+
+WORKDIR /app
 
 # Copy binary and static assets
 COPY --from=builder /app/simplegit .
@@ -25,15 +29,15 @@ COPY templates/ templates/
 
 # Create necessary directories with correct permissions
 RUN mkdir -p /app/repositories /app/data /app/ssh && \
-    adduser -D -h /app gituser && \
-    chown -R gituser:gituser /app/repositories && \
-    chown -R gituser:gituser /app/data && \
-    chown -R gituser:gituser /app/ssh && \
-    chmod 755 /app/repositories && \
-    chmod 755 /app/data && \
-    chmod 755 /app/ssh
+    chown -R gituser:gituser /app && \
+    chmod 755 /app/repositories /app/data /app/ssh
 
+# Switch to non-root user
 USER gituser
 
+# Set up volumes for persistent data
+VOLUME ["/app/repositories", "/app/data", "/app/ssh"]
+
 EXPOSE 3000 2222
+
 CMD ["./simplegit"]

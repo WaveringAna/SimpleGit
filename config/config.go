@@ -62,6 +62,11 @@ func Init() {
 	if err := envconfig.Process("SIMPLEGIT", &GlobalConfig); err != nil {
 		log.Printf("Warning: Environment variable processing error: %v", err)
 		// Continue anyway since we might have values from config.json
+	} else {
+		log.Printf("Successfully loaded environment variables")
+		// Debug: print the loaded config
+		//prettyConfig, _ := json.MarshalIndent(GlobalConfig, "", "    ")
+		//log.Printf("Loaded config: %s", string(prettyConfig))
 	}
 
 	// Post-processing
@@ -102,6 +107,9 @@ func Init() {
 	log.Printf("- Data Directory: %s", GlobalConfig.DataDir)
 	log.Printf("- Repository Path: %s", GlobalConfig.RepoPath)
 	log.Printf("- Development Mode: %v", GlobalConfig.DevMode)
+	log.Printf("- Max File Size: %d bytes", GlobalConfig.MaxFileSize)
+	log.Printf("- Date Format: %s", GlobalConfig.DateFormat)
+	log.Printf("TSService URL: %s", GlobalConfig.TSServiceURL)
 }
 
 func createDirIfNotExists(path string) {

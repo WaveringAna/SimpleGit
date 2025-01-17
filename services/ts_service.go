@@ -43,7 +43,7 @@ func (s *TSService) Highlight(code, language, filename string) (*HighlightRespon
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	resp, err := http.Post(s.BaseURL+"/highlight", "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.Post(config.GlobalConfig.TSServiceURL+"/highlight", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, fmt.Errorf("failed to make request: %w", err)
 	}
