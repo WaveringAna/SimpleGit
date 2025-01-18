@@ -11,27 +11,6 @@
 </head>
 <body>
     {{template "navbar" .}}
-    <!---
-    <header>
-        <div class="header-content">
-            <h1>
-                <a href="/">Git Server</a> / 
-                <a href="/repo/{{.Repo.Name}}">{{.Repo.Name}}</a> /
-                {{$repo := .Repo.Name}}
-                {{$parts := split .Path "/"}}
-                {{$path := ""}}
-                {{range $i, $part := $parts}}
-                    {{if lt $i (sub (len $parts) 1)}}
-                        {{$path = printf "%s/%s" $path $part}}
-                        <a href="/repo/{{$repo}}{{$path}}">{{$part}}</a> /
-                    {{else}}
-                        {{$part}}
-                    {{end}}
-                {{end}}
-            </h1>
-        </div>
-    </header>-->
-
     <main>
         <div class="file-view">
             <div class="file-content">
@@ -48,20 +27,6 @@
                         </a>
                     </div>
                 </div>
-                <!--
-                <div class="code-container">
-                    <table class="line-numbers-table">
-                        <tbody>
-                            {{range $index, $line := .Lines}}
-                            <tr>
-                                <td class="line-number" id="L{{add $index 1}}">{{add $index 1}}</td>
-                                <td class="line-content"><code>{{$line}}</code></td>
-                            </tr>
-                            {{end}}
-                        </tbody>
-                    </table>
-                </div>
-                -->
                 <div class="code-container" data-content="{{range $index, $line := .Lines}}{{$line}}&#10;{{end}}">
                     <table class="line-numbers-table">
                         <tbody>
@@ -91,4 +56,48 @@
         </div>
     </main>
 </body>
+<script>
+document.addEventListener('DOMContentLoaded', (event) => {
+    document.querySelectorAll('.symbol-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const lineId = item.getAttribute('href');
+            const lineElement = document.querySelector(lineId);
+            if (lineElement) {
+                lineElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Add highlight effect
+                lineElement.closest('tr').classList.add('highlighted');
+                setTimeout(() => {
+                    lineElement.closest('tr').classList.remove('highlighted');
+                }, 2000);
+            }
+        });
+    });
+});
+
+function copyCode() {
+    // Get all code content
+    const codeLines = document.querySelectorAll('.line-content');
+    let codeText = '';
+    codeLines.forEach(line => {
+        codeText += line.textContent + '\n';
+    });
+            
+    // Copy to clipboard
+    navigator.clipboard.writeText(codeText).then(() => {
+        // Visual feedback
+        const copyBtn = document.querySelector('.fa-copy').parentElement;
+        copyBtn.classList.add('copied');
+        copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+                
+        // Reset button after 2 seconds
+        setTimeout(() => {
+            copyBtn.classList.remove('copied');
+            copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> Copy';
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+    });
+}
+</script>
 </html>
