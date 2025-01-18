@@ -3,9 +3,18 @@
 package handlers
 
 import (
-	"fmt"
+	"SimpleGit/models"
+	"context"
 	"net/http"
 	"os"
+)
+
+type contextKey string
+
+const (
+	userContextKey        contextKey = "user"
+	userIDContextKey      contextKey = "userID"
+	userIsAdminContextKey contextKey = "userIsAdmin"
 )
 
 // AuthMiddleware wraps handlers requiring authentication
@@ -23,9 +32,14 @@ func (s *Server) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		// Add user to request context
-		r.Header.Set("User-ID", user.ID)
-		r.Header.Set("User-Admin", fmt.Sprintf("%v", user.IsAdmin))
+		// Use context instead of headers
+		ctx := context.WithValue(r.Context(), userContextKey, user)
+		ctx = context.WithValue(ctx, userIDContextKey, user.ID)
+		ctx = context.WithValue(ctx, userIsAdminContextKey, user.IsAdmin)
+
+		// Create new request with updated context
+		r = r.WithContext(ctx)
+
 		next.ServeHTTP(w, r)
 	}
 }
@@ -33,7 +47,8 @@ func (s *Server) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 // AdminMiddleware ensures the user is an admin
 func (s *Server) AdminMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("User-Admin") != "true" {
+		isAdmin, ok := r.Context().Value(userIsAdminContextKey).(bool)
+		if !ok || !isAdmin {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
@@ -77,6 +92,23 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	} else {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
+}
+
+func getUserFromContext(r *http.Request) (*models.User, bool) {
+	user, ok := r.Context().Value(userContextKey).(*models.User)
+	return user, ok
+}
+
+// getUserID returns the user ID from the request context
+func getUserID(r *http.Request) (string, bool) {
+	userID, ok := r.Context().Value(userIDContextKey).(string)
+	return userID, ok
+}
+
+// isAdmin returns whether the user is an admin from the request context
+func isAdmin(r *http.Request) bool {
+	isAdmin, ok := r.Context().Value(userIsAdminContextKey).(bool)
+	return ok && isAdmin
 }
 
 func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {

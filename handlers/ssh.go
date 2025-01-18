@@ -14,8 +14,8 @@ type SSHKeyRequest struct {
 
 func (s *Server) handleAddSSHKey(w http.ResponseWriter, r *http.Request) {
 	// Get user from context
-	user, err := s.getUserFromRequest(r)
-	if err != nil {
+	userID, ok := getUserID(r)
+	if !ok {
 		models.HandleError(w, r, models.NewUnauthorizedError("Not authenticated"))
 		return
 	}
@@ -36,7 +36,7 @@ func (s *Server) handleAddSSHKey(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Add SSH key
-	key, err := s.userService.AddSSHKey(user.ID, req.Name, req.PublicKey)
+	key, err := s.userService.AddSSHKey(userID, req.Name, req.PublicKey)
 	if err != nil {
 		models.HandleError(w, r, models.NewInternalError("Failed to add SSH key").WithError(err))
 		return

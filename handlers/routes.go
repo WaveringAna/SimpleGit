@@ -3,7 +3,7 @@
 package handlers
 
 import (
-	"fmt"
+	"context"
 	"net/http"
 	"os"
 )
@@ -16,8 +16,8 @@ func (s *Server) addUserData(next http.HandlerFunc) http.HandlerFunc {
 			user, err := s.userService.VerifyToken(cookie.Value)
 			if err == nil {
 				// Add user to request context
-				r.Header.Set("User-ID", user.ID)
-				r.Header.Set("User-Admin", fmt.Sprintf("%v", user.IsAdmin))
+				ctx := context.WithValue(r.Context(), userContextKey, user)
+				r = r.WithContext(ctx)
 			}
 		}
 		next.ServeHTTP(w, r)

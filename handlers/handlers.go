@@ -195,8 +195,9 @@ func (s *Server) addCommonData(r *http.Request, data map[string]interface{}) map
 		data = make(map[string]interface{})
 	}
 
-	user, _ := s.getUserFromRequest(r)
-	data["User"] = user
+	if user, ok := getUserFromContext(r); ok {
+		data["User"] = user
+	}
 
 	return data
 }
@@ -632,8 +633,8 @@ func (s *Server) handleGitProtocol(w http.ResponseWriter, r *http.Request, repo 
 }
 
 func (s *Server) handleProfile(w http.ResponseWriter, r *http.Request) {
-	user, err := s.getUserFromRequest(r)
-	if err != nil {
+	user, ok := getUserFromContext(r)
+	if !ok {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
@@ -684,15 +685,9 @@ func (s *Server) SetUserService(userService *models.UserService) {
 //
 //	The user object or nil if not found.
 func (s *Server) getUserFromRequest(r *http.Request) (*models.User, error) {
-	userID := r.Header.Get("User-ID")
-	if userID == "" {
-		return nil, nil
+	user, ok := r.Context().Value(userContextKey).(*models.User)
+	if !ok || user == nil {
+		return nil, fmt.Errorf("user not found in context")
 	}
-
-	var user models.User
-	if err := s.db.First(&user, "id = ?", userID).Error; err != nil {
-		return nil, err
-	}
-
-	return &user, nil
+	return user, nil
 }
