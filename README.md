@@ -44,7 +44,7 @@ SimpleGit is a lightweight, self-hosted Git server written in Go that provides a
   - Add/remove SSH keys
   - Key fingerprint tracking
   - Per-user SSH key management
-- Initial admin setup system
+- Initial admin setup system:
   - Secure first-time admin creation
   - Setup token generation
 
@@ -56,15 +56,16 @@ SimpleGit is a lightweight, self-hosted Git server written in Go that provides a
   - JWT for authentication
   - Gorilla Mux for routing
   - go-git for Git operations
-  - TypeScript service for syntax highlighting
+  - Built-in TypeScript service for syntax highlighting
 - Frontend:
   - HTMX for dynamic updates
   - Highlight.js for syntax highlighting
   - Tailwind CSS for styling
   - Font Awesome icons
   - Nord theme color scheme
-- Docker and Docker Compose support:
-  - Multi-stage builds
+- Docker support:
+  - Single container deployment
+  - Multi-stage builds for minimal image size
   - Volume management
   - Non-root user security
   - Resource limiting
@@ -77,6 +78,26 @@ SimpleGit is a lightweight, self-hosted Git server written in Go that provides a
   - XSS prevention
 
 ## Quick Start
+
+### Docker Setup (Recommended)
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/simplegit.git
+cd simplegit
+```
+
+2. Create the configuration file:
+```bash
+cp config.json.example config.json
+```
+
+3. Edit `config.json` with your settings
+
+4. Start with Docker Compose:
+```bash
+docker-compose up -d
+```
 
 ### Manual Setup
 
@@ -100,14 +121,6 @@ go build
 ./simplegit
 ```
 
-6. Run typescript service
-```bash
-cd services/ts-worker
-npm install
-npm run build
-npm run start
-```
-
 ## Configuration
 
 The server can be configured through environment variables or a JSON config file. Environment variables take precedence over the JSON configuration.
@@ -125,18 +138,18 @@ The server can be configured through environment variables or a JSON config file
 - `SIMPLEGIT_SSH_KEY_PATH`: Path to SSH host key
 - `SIMPLEGIT_REPO_PATH`: Path to store Git repositories
 - `SIMPLEGIT_DB_PATH`: Path to SQLite database file
-- `TS_SERVICE_URL`: URL for the TypeScript syntax highlighting service
+- `TS_SERVICE_URL`: URL for the TypeScript syntax highlighting service (default: http://localhost:3001)
 
 ### Docker Configuration
 
 The included Docker setup provides:
+- Single container deployment including both Go and TypeScript services
 - Multi-stage build for minimal image size
 - Volume mounting for repositories and data
 - Environment-based configuration
 - Automatic repository directory creation
 - Non-root user for security
 - Resource limits and reservations
-- Two-service architecture (main server + TS worker)
 
 Example docker-compose.yml:
 ```yaml
@@ -158,28 +171,13 @@ services:
       - SIMPLEGIT_JWT_SECRET=your-secure-secret
       - SIMPLEGIT_DOMAIN=git.yourdomain.com
       - SIMPLEGIT_MAX_FILE_SIZE=10485760
-      - TS_SERVICE_URL=http://ts-worker:3001
     restart: unless-stopped
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 768M
         reservations:
-          memory: 128M
-  
-  ts-worker:
-    build:
-      context: ./services/ts-worker
-      dockerfile: Dockerfile
-    environment:
-      - NODE_ENV=production
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
           memory: 256M
-        reservations:
-          memory: 64M
 ```
 
 ## Initial Setup
@@ -246,7 +244,7 @@ simplegit/
   - Nord theme (Color scheme)
 
 - Services:
-  - TypeScript/Node.js syntax highlighting service
+  - Built-in TypeScript syntax highlighting service
   - Express.js for TS service API
   - highlight.js for server-side syntax highlighting
 
