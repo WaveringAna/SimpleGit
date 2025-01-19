@@ -22,20 +22,12 @@ services:
           memory: 512M
         reservations:
           memory: 128M
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    networks:
-      - backend
-
   ts-worker:
     build:
       context: ./services/ts-worker
       dockerfile: Dockerfile
     environment:
       - NODE_ENV=production
-      - SIMPLEGIT_URL=http://localhost:3000
     restart: unless-stopped
     deploy:
       resources:
@@ -43,12 +35,6 @@ services:
           memory: 256M
         reservations:
           memory: 64M
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    networks:
-      - backend
 
 networks:
   backend:

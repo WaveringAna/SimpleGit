@@ -7,12 +7,16 @@ body {
     padding: 0;
     color: #e5e9f0;
     background: #1f2126;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 main {
-    max-width: 75%;
+    width: 75%;
+    flex: 1;
     margin: 0 auto;
-    padding: 2rem;
+    padding-top: 2rem;
 }
 
 /* Typography */

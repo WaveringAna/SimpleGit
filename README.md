@@ -8,38 +8,79 @@ SimpleGit is a lightweight, self-hosted Git server written in Go that provides a
 
 ## Features
 
-- **Web Interface**
-  - Repository browser with syntax highlighting
-  - Commit history viewer
-  - File content viewer with symbol navigation
-  - Support for multiple branches
-  - Admin dashboard
-  - Dark theme with Nord color scheme
+### Web Interface
+- Repository browser with advanced features:
+  - Syntax highlighting with language auto-detection
+  - Code symbol navigation (functions, classes, methods)
+  - File content viewer with line numbers
+  - Support for binary file detection
+  - Copy code functionality
+  - Raw file view support
+- Commit history viewer with:
+  - Detailed commit information
+  - File diff viewer with syntax highlighting
+  - Unified diff view
+- Multi-branch support with branch switching
+- Dark theme using Nord color scheme
+- Responsive design with clean UI
 
-- **Git Operations**
-  - HTTP Git protocol support (clone, push, pull)
-  - SSH Git protocol support
-  - User-managed SSH key authentication
-  - Support for bare repositories
+### Git Operations
+- HTTP Git protocol support:
+  - Clone, push, pull operations
+  - Automatic bare repository handling
+- SSH Git protocol support:
+  - Public key authentication
+  - User-managed SSH key system
+  - Custom SSH port configuration
+- Branch management
+- Support for bare and non-bare repositories
 
-- **User Management**
-  - User authentication with JWT
+### User Management
+- Complete user authentication system:
+  - JWT-based authentication
   - Role-based access control (Admin/User)
-  - SSH key management per user
-  - Admin user creation system
+  - User profile management
+- SSH key management:
+  - Add/remove SSH keys
+  - Key fingerprint tracking
+  - Per-user SSH key management
+- Initial admin setup system
+  - Secure first-time admin creation
+  - Setup token generation
 
-- **Technical Features**
+### Technical Features
+- Backend:
+  - Go 1.21+
   - SQLite database for user management
-  - Docker and Docker Compose support
-  - Configurable through environment variables or JSON
-  - Syntax highlighting for multiple languages
-  - Symbol detection and navigation for code files
+  - GORM for ORM functionality
+  - JWT for authentication
+  - Gorilla Mux for routing
+  - go-git for Git operations
+  - TypeScript service for syntax highlighting
+- Frontend:
+  - HTMX for dynamic updates
+  - Highlight.js for syntax highlighting
+  - Tailwind CSS for styling
+  - Font Awesome icons
+  - Nord theme color scheme
+- Docker and Docker Compose support:
+  - Multi-stage builds
+  - Volume management
+  - Non-root user security
+  - Resource limiting
+  - Environment-based configuration
+- Security features:
+  - CSRF protection
+  - Secure cookie handling
+  - SSH key validation
+  - Rate limiting support
+  - XSS prevention
 
 ## Quick Start
 
 ### Manual Setup
 
-1. Install Go 1.21 or later
+1. Install Go 1.21 or later, Install NodeJS and NPM
 2. Clone the repository:
 ```bash
 git clone https://github.com/yourusername/simplegit.git
@@ -59,13 +100,19 @@ go build
 ./simplegit
 ```
 
-## Configuration
+6. Run typescript service
+```bash
+cd services/ts-worker
+npm install
+npm run build
+npm run start
+```
 
-### Configuration
+## Configuration
 
 The server can be configured through environment variables or a JSON config file. Environment variables take precedence over the JSON configuration.
 
-Environment variables:
+### Environment Variables:
 
 - `SIMPLEGIT_DEV_MODE`: Enable development mode (boolean)
 - `SIMPLEGIT_PORT`: HTTP server port
@@ -78,6 +125,7 @@ Environment variables:
 - `SIMPLEGIT_SSH_KEY_PATH`: Path to SSH host key
 - `SIMPLEGIT_REPO_PATH`: Path to store Git repositories
 - `SIMPLEGIT_DB_PATH`: Path to SQLite database file
+- `TS_SERVICE_URL`: URL for the TypeScript syntax highlighting service
 
 ### Docker Configuration
 
@@ -87,6 +135,8 @@ The included Docker setup provides:
 - Environment-based configuration
 - Automatic repository directory creation
 - Non-root user for security
+- Resource limits and reservations
+- Two-service architecture (main server + TS worker)
 
 Example docker-compose.yml:
 ```yaml
@@ -101,12 +151,14 @@ services:
     volumes:
       - ./repositories:/app/repositories
       - ./data:/app/data
+      - ./ssh:/app/ssh
     environment:
       - SIMPLEGIT_PORT=3000
       - SIMPLEGIT_SSH_PORT=2222
       - SIMPLEGIT_JWT_SECRET=your-secure-secret
       - SIMPLEGIT_DOMAIN=git.yourdomain.com
       - SIMPLEGIT_MAX_FILE_SIZE=10485760
+      - TS_SERVICE_URL=http://ts-worker:3001
     restart: unless-stopped
     deploy:
       resources:
@@ -114,24 +166,20 @@ services:
           memory: 512M
         reservations:
           memory: 128M
-```
-
-Custom Docker run command:
-```bash
-docker run -d \
-  --name simplegit \
-  -p 3000:3000 \
-  -p 2222:2222 \
-  -v ./repositories:/app/repositories \
-  -v ./data:/app/data \
-  -e SIMPLEGIT_PORT=3000 \
-  -e SIMPLEGIT_SSH_PORT=2222 \
-  -e SIMPLEGIT_JWT_SECRET=your-secure-secret \
-  -e SIMPLEGIT_DOMAIN=localhost \
-  -e SIMPLEGIT_DATA_DIR=/app/data \
-  -e SIMPLEGIT_REPO_PATH=/app/repositories \
-  -e SIMPLEGIT_DB_PATH=/app/data/githost.db \
-  simplegit
+  
+  ts-worker:
+    build:
+      context: ./services/ts-worker
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 64M
 ```
 
 ## Initial Setup
@@ -174,6 +222,7 @@ simplegit/
 ├── database/      # Database initialization
 ├── handlers/      # HTTP request handlers
 ├── models/        # Data models and business logic
+├── services/      # Additional services (TS worker)
 ├── ssh/          # SSH server implementation
 ├── static/       # Static web assets
 ├── templates/    # HTML templates
@@ -195,6 +244,11 @@ simplegit/
   - Highlight.js (Syntax highlighting)
   - Font Awesome (Icons)
   - Nord theme (Color scheme)
+
+- Services:
+  - TypeScript/Node.js syntax highlighting service
+  - Express.js for TS service API
+  - highlight.js for server-side syntax highlighting
 
 ## Contributing
 
