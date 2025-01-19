@@ -1,6 +1,8 @@
 package ssh
 
 import (
+	"SimpleGit/config"
+
 	"SimpleGit/models"
 	"crypto/rand"
 	"crypto/rsa"
@@ -30,26 +32,24 @@ func NewServer(repoPath string, userService *models.UserService, onUpdate func()
 	}
 
 	// TODO figure out how to default to PublicKeyCallback while allowing KeyboardInteractiveCallback
-	config := &ssh.ServerConfig{
+	sshConfig := &ssh.ServerConfig{
 		PublicKeyCallback: server.authenticateKey,
 		//KeyboardInteractiveCallback: server.keyboardInteractiveCallback,
 		ServerVersion: "SSH-2.0-SimpleGit",
 	}
 
-	keyDir := "ssh"
-	if err := os.MkdirAll(keyDir, 0700); err != nil {
+	keyPath := config.GlobalConfig.SSHKeyPath
+	if err := os.MkdirAll(filepath.Dir(keyPath), 0700); err != nil {
 		return nil, fmt.Errorf("failed to create SSH key directory: %w", err)
 	}
 
-	hostKeyPath := filepath.Join(keyDir, "host_key")
-	hostKey, err := loadOrGenerateHostKey(hostKeyPath)
+	hostKey, err := loadOrGenerateHostKey(keyPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to setup host key: %w", err)
 	}
 
-	config.AddHostKey(hostKey)
-	server.config = config
-
+	sshConfig.AddHostKey(hostKey)
+	server.config = sshConfig
 	return server, nil
 }
 

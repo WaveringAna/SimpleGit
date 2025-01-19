@@ -27,7 +27,7 @@ func main() {
 	// Initialize user service with JWT key
 	userService := models.NewUserService(db, []byte(config.GlobalConfig.JWTSecret))
 
-	server, err := handlers.NewServer("./repositories")
+	server, err := handlers.NewServer(config.GlobalConfig.RepoPath)
 	if err != nil {
 		log.Fatal(err)
 	}
