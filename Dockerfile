@@ -28,9 +28,6 @@ FROM alpine:latest
 # Install runtime dependencies
 RUN apk add --no-cache git sqlite nodejs
 
-# Create non-root user
-RUN adduser -D -h /app gituser
-
 WORKDIR /app
 
 # Copy binaries and assets from build stages
@@ -40,19 +37,10 @@ COPY --from=ts-builder /app/ts-service/node_modules ./ts-service/node_modules
 COPY static/ static/
 COPY templates/ templates/
 
-# Create necessary directories with correct permissions
-RUN mkdir -p /app/repositories /app/data /app/ssh && \
-    chown -R gituser:gituser /app && \
-    chmod 755 /app/repositories /app/data /app/ssh
-
-# Switch to non-root user
-USER gituser
-
-# Set up volumes for persistent data
-VOLUME ["/app/repositories", "/app/data", "/app/ssh"]
+RUN mkdir -p /app/repositories /app/data /app/ssh
 
 # Add startup script
-COPY --chown=gituser:gituser <<EOF /app/start.sh
+COPY  <<EOF /app/start.sh
 #!/bin/sh
 cd /app/ts-service && node dist/server.js & 
 cd /app && ./simplegit
