@@ -9,44 +9,24 @@ SimpleGit is a lightweight, self-hosted Git server written in Go that provides a
 ## Features
 
 ### Web Interface
-- Repository browser with advanced features:
-  - Syntax highlighting with language auto-detection
-  - Code symbol navigation (functions, classes, methods)
-  - File content viewer with line numbers
-  - Support for binary file detection
-  - Copy code functionality
-  - Raw file view support
-- Commit history viewer with:
-  - Detailed commit information
-  - File diff viewer with syntax highlighting
-  - Unified diff view
+- Repository browser
+- Commit history viewer
 - Multi-branch support with branch switching
-- Dark theme using Nord color scheme
-- Responsive design with clean UI
 
 ### Git Operations
 - HTTP Git protocol support:
-  - Clone, push, pull operations
+  - Clone, push operations
   - Automatic bare repository handling
 - SSH Git protocol support:
   - Public key authentication
   - User-managed SSH key system
-  - Custom SSH port configuration
-- Branch management
-- Support for bare and non-bare repositories
 
 ### User Management
-- Complete user authentication system:
-  - JWT-based authentication
-  - Role-based access control (Admin/User)
-  - User profile management
-- SSH key management:
+- Complete user authentication system
+- SSH key management
   - Add/remove SSH keys
   - Key fingerprint tracking
   - Per-user SSH key management
-- Initial admin setup system:
-  - Secure first-time admin creation
-  - Setup token generation
 
 ### Technical Features
 - Backend:
@@ -58,24 +38,7 @@ SimpleGit is a lightweight, self-hosted Git server written in Go that provides a
   - go-git for Git operations
   - Built-in TypeScript service for syntax highlighting
 - Frontend:
-  - HTMX for dynamic updates
   - Highlight.js for syntax highlighting
-  - Tailwind CSS for styling
-  - Font Awesome icons
-  - Nord theme color scheme
-- Docker support:
-  - Single container deployment
-  - Multi-stage builds for minimal image size
-  - Volume management
-  - Non-root user security
-  - Resource limiting
-  - Environment-based configuration
-- Security features:
-  - CSRF protection
-  - Secure cookie handling
-  - SSH key validation
-  - Rate limiting support
-  - XSS prevention
 
 ## Quick Start
 
@@ -157,7 +120,7 @@ version: "3.8"
 
 services:
   simplegit:
-    build: .
+    image: ghcr.io/waveringana/simplegit:v0
     ports:
       - "3000:3000"
       - "2222:2222"
@@ -238,23 +201,12 @@ simplegit/
   - JWT (Authentication)
 
 - Frontend:
-  - HTMX (Dynamic updates)
   - Highlight.js (Syntax highlighting)
-  - Font Awesome (Icons)
-  - Nord theme (Color scheme)
 
 - Services:
   - Built-in TypeScript syntax highlighting service
   - Express.js for TS service API
   - highlight.js for server-side syntax highlighting
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
 
 ## License
 
