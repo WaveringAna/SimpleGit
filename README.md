@@ -124,7 +124,7 @@ version: "3.8"
 
 services:
   simplegit:
-    image: ghcr.io/waveringana/simplegit:v0
+    image: ghcr.io/waveringana/simplegit:v0.1
     ports:
       - "3000:3000"
       - "2222:2222"
