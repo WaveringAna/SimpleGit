@@ -3,7 +3,12 @@
     background: #262931;
     border: 1px solid #2E323A;
     border-radius: 6px;
+    max-height: calc(100vh - 200px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
+
 
 .commit-history h2 {
     margin: 0;
@@ -12,16 +17,25 @@
     font-size: 1.2rem;
     background: #2E323A;
     color: #E5E9F0;
+    flex-shrink: 0;
 }
 
+
 .commits {
-    max-height: 70vh;
     overflow-y: auto;
+    flex: 1;
+    min-height: 0;
 }
 
 .commit {
     padding: 1rem;
     border-bottom: 1px solid #2E323A;
+}
+
+.clone-instructions {
+    padding: 1rem;
+    border-top: 1px solid #2E323A;
+    flex-shrink: 0;
 }
 
 .commit:last-child {

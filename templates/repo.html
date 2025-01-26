@@ -1,20 +1,22 @@
 <!-- templates/repo.html -->
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>{{.Repo.Name}} - Git Server</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
+
 <body>
-    {{template "navbar" dict 
-        "User" .User 
-        "Title" .Repo.Name 
-        "RepoName" .Repo.Name 
-        "Path" .Path 
-        "ShowBranches" (not .IsEmpty)
-        "Branches" .Branches 
-        "CurrentBranch" .Branch
+    {{template "navbar" dict
+    "User" .User
+    "Title" .Repo.Name
+    "RepoName" .Repo.Name
+    "Path" .Path
+    "ShowBranches" (not .IsEmpty)
+    "Branches" .Branches
+    "CurrentBranch" .Branch
     }}
 
     <main>
@@ -33,37 +35,41 @@ git push origin main</pre>
         {{else}}
         <div class="repo-content">
             <div class="file-browser">
-                <table class="files">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Size</th>
-                            <th>Last Commit</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{if .Path}}
-                        <tr>
-                            <td><a href="/repo/{{.Repo.Name}}/{{dir .Path}}">..</a></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        {{end}}
-                        {{range .Entries}}
-                        <tr>
-                            <td>
-                                {{if eq .Type "tree"}}
-                                <a href="/repo/{{$.Repo.Name}}/{{.Path}}"><i class="fa-regular fa-folder"></i> {{.Name}}/</a>
-                                {{else}}
-                                <a href="/file/{{$.Repo.Name}}/{{.Path}}"><i class="{{getFileIcon .Name}}"></i> {{.Name}}</a>
-                                {{end}}
-                            </td>
-                            <td>{{if ne .Type "tree"}}{{formatSize .Size}}{{end}}</td>
-                            <td>{{firstLine .Message}}</td>
-                        </tr>
-                        {{end}}
-                    </tbody>
-                </table>
+                <div class="table-wrapper">
+                    <table class="files">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Size</th>
+                                <th>Last Commit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{if .Path}}
+                            <tr>
+                                <td><a href="/repo/{{.Repo.Name}}/{{dir .Path}}">..</a></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            {{end}}
+                            {{range .Entries}}
+                            <tr>
+                                <td>
+                                    {{if eq .Type "tree"}}
+                                    <a href="/repo/{{$.Repo.Name}}/{{.Path}}"><i class="fa-regular fa-folder"></i>
+                                        {{.Name}}/</a>
+                                    {{else}}
+                                    <a href="/file/{{$.Repo.Name}}/{{.Path}}"><i class="{{getFileIcon .Name}}"></i>
+                                        {{.Name}}</a>
+                                    {{end}}
+                                </td>
+                                <td>{{if ne .Type "tree"}}{{formatSize .Size}}{{end}}</td>
+                                <td>{{firstLine .Message}}</td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="commit-history">
@@ -90,4 +96,5 @@ git push origin main</pre>
     </main>
     {{template "footer" .}}
 </body>
+
 </html>

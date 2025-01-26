@@ -2,6 +2,7 @@
 .repo-list {
     width: 100%;
     max-width: none;
+    max-height: calc(100vh - 200px);
     margin: 0;
     padding: 1rem 2rem;
     display: grid;
@@ -54,6 +55,7 @@
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 2rem;
+    max-height: calc(100vh - 200px);
 }
 
 /* Empty repository state */
@@ -85,4 +87,4 @@
     margin: 0;
     white-space: pre;
     overflow-x: auto;
-} 
+}

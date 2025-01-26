@@ -3,7 +3,17 @@
     background: #262931;
     border: 1px solid #2E323A;
     border-radius: 6px;
+    max-height: calc(100vh - 200px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
+
+.table-wrapper {
+    overflow-y: auto;
+    flex: 1;
+}
+
 
 /* Path Navigation */
 .path-nav {
@@ -29,6 +39,13 @@ table.files {
     table-layout: fixed;
 }
 
+table.files thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #2E323A;
+}
+
 table.files th,
 table.files td {
     padding: 0.75rem 1rem;
@@ -40,17 +57,20 @@ table.files td {
 
 table.files th:nth-child(1),
 table.files td:nth-child(1) {
-    width: 40%;  /* Name column */
+    width: 40%;
+    /* Name column */
 }
 
 table.files th:nth-child(2),
 table.files td:nth-child(2) {
-    width: 10%;  /* Size column */
+    width: 10%;
+    /* Size column */
 }
 
 table.files th:nth-child(3),
 table.files td:nth-child(3) {
-    width: 50%;  /* Last commit column */
+    width: 50%;
+    /* Last commit column */
 }
 
 table.files th {
