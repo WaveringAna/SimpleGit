@@ -48,6 +48,7 @@ EOF
 
 RUN chmod +x /app/start.sh
 
-EXPOSE 3000 2222
+ENV TS_SERVICE_PORT=3001
+EXPOSE 3000 2222 3001
 
 CMD ["/app/start.sh"]

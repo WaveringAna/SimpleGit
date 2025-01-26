@@ -4,7 +4,7 @@ import { Highlighter } from './highlighter';
 import { HighlightRequest } from './types';
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.TS_SERVICE_PORT || 3001;
 const highlighter = new Highlighter();
 
 app.use(cors());
