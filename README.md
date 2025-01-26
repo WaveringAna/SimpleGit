@@ -9,11 +9,13 @@ SimpleGit is a lightweight, self-hosted Git server written in Go that provides a
 ## Features
 
 ### Web Interface
+
 - Repository browser
 - Commit history viewer
 - Multi-branch support with branch switching
 
 ### Git Operations
+
 - HTTP Git protocol support:
   - Clone, push operations
   - Automatic bare repository handling
@@ -22,6 +24,7 @@ SimpleGit is a lightweight, self-hosted Git server written in Go that provides a
   - User-managed SSH key system
 
 ### User Management
+
 - Complete user authentication system
 - SSH key management
   - Add/remove SSH keys
@@ -29,6 +32,7 @@ SimpleGit is a lightweight, self-hosted Git server written in Go that provides a
   - Per-user SSH key management
 
 ### Technical Features
+
 - Backend:
   - Go 1.21+
   - SQLite database for user management
@@ -45,12 +49,14 @@ SimpleGit is a lightweight, self-hosted Git server written in Go that provides a
 ### Docker Setup (Recommended)
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/yourusername/simplegit.git
 cd simplegit
 ```
 
 2. Create the configuration file:
+
 ```bash
 cp config.json.example config.json
 ```
@@ -58,6 +64,7 @@ cp config.json.example config.json
 3. Edit `config.json` with your settings
 
 4. Start with Docker Compose:
+
 ```bash
 docker-compose up -d
 ```
@@ -66,12 +73,14 @@ docker-compose up -d
 
 1. Install Go 1.21 or later, Install NodeJS and NPM
 2. Clone the repository:
+
 ```bash
 git clone https://github.com/yourusername/simplegit.git
 cd simplegit
 ```
 
 3. Create the configuration file:
+
 ```bash
 cp config.json.example config.json
 ```
@@ -79,6 +88,7 @@ cp config.json.example config.json
 4. Edit `config.json` with your settings
 
 5. Build and run:
+
 ```bash
 go build
 ./simplegit
@@ -105,16 +115,10 @@ The server can be configured through environment variables or a JSON config file
 
 ### Docker Configuration
 
-The included Docker setup provides:
-- Single container deployment including both Go and TypeScript services
-- Multi-stage build for minimal image size
-- Volume mounting for repositories and data
-- Environment-based configuration
-- Automatic repository directory creation
-- Non-root user for security
-- Resource limits and reservations
+The included Docker setup provides a single container deployment including both Go and TypeScript services
 
 Example docker-compose.yml:
+
 ```yaml
 version: "3.8"
 
@@ -164,11 +168,13 @@ services:
 ### Clone a Repository
 
 HTTP:
+
 ```bash
 git clone http://localhost:3000/repo/example.git
 ```
 
 SSH:
+
 ```bash
 git clone ssh://git@localhost:2222/example.git
 ```
@@ -184,15 +190,16 @@ simplegit/
 ├── handlers/      # HTTP request handlers
 ├── models/        # Data models and business logic
 ├── services/      # Additional services (TS worker)
-├── ssh/          # SSH server implementation
-├── static/       # Static web assets
-├── templates/    # HTML templates
-└── utils/        # Utility functions
+├── ssh/           # SSH server implementation
+├── static/        # Static web assets
+├── templates/     # HTML templates
+└── utils/         # Utility functions
 ```
 
 ### Technology Stack
 
 - Backend:
+
   - Go 1.21+
   - go-git (Git operations)
   - GORM (ORM)
@@ -201,6 +208,7 @@ simplegit/
   - JWT (Authentication)
 
 - Frontend:
+
   - Highlight.js (Syntax highlighting)
 
 - Services:
@@ -215,6 +223,7 @@ This project is released under the Unlicense. See the LICENSE file for details.
 ## Acknowledgments
 
 Built with these excellent libraries:
+
 - highlight.js - BSD Three Clause License
 - htmx - BSD Zero Clause License
 - go-git - Apache License 2.0
