@@ -2,14 +2,15 @@ module SimpleGit
 
 go 1.21
 
-require github.com/go-git/go-git/v5 v5.13.1
+require (
+	github.com/go-git/go-git/v5 v5.13.1
+	github.com/gomarkdown/markdown v0.0.0-20241205020045-f7e15b2f3e62
+	github.com/kelseyhightower/envconfig v1.4.0
+)
 
 require (
-	github.com/gomarkdown/markdown v0.0.0-20241205020045-f7e15b2f3e62 // indirect
-	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	golang.org/x/text v0.21.0 // indirect
 )
@@ -23,7 +24,7 @@ require (
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.6.1 // indirect
-	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/uuid v1.6.0
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
