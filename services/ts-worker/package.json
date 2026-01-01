@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.18.2",
+    "express": "^4.22.1",
     "highlight.js": "^11.11.1",
     "typescript": "^5.3.3"
   },
